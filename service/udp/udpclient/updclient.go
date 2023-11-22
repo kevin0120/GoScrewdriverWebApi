@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/hex"
 	"fmt"
-	"github.com/kevin0120/GoScrewdriverWebApi/config"
 	"net"
 	"time"
 )
@@ -12,35 +11,16 @@ import (
 type UdpClient struct {
 	udpConnect *net.UDPConn
 	rid        int
+	timeoutMs  int
 	ctx        context.Context
 	cancel     context.CancelFunc
 }
 
-func NewClient() *UdpClient {
-	conf := config.GetConfig()
-	// 解析服务器地址
-	udpAddr := &net.UDPAddr{
-		IP:   net.ParseIP(conf.UdpClient.RemoteHost),
-		Port: conf.UdpClient.RemotePort,
-	}
-	// 解析本地地址
-	laddr := &net.UDPAddr{
-		IP:   net.ParseIP("0.0.0.0"),
-		Port: conf.UdpClient.LocalPort,
-	}
-	//创建连接
-	conn, err := net.DialUDP("udp", laddr, udpAddr)
-	if err != nil {
-		fmt.Println("DialUDP error:", err)
-	}
-
+func NewClient(timeoutMs int) *UdpClient {
 	client := UdpClient{
-		rid:        0,
-		udpConnect: conn,
+		timeoutMs: timeoutMs,
+		rid:       0,
 	}
-	// 创建一个取消上下文和等待组
-	client.ctx, client.cancel = context.WithCancel(context.Background())
-
 	//go client.Heart()
 	return &client
 }
@@ -54,11 +34,10 @@ func (c *UdpClient) Open() {
 				fmt.Println("接收到退出信号")
 				return
 			default:
-				fmt.Println("协程运行中...")
 				c.udpConnect.SetReadDeadline(time.Now().Add(3 * time.Second))
 				n, err := c.udpConnect.Read(data)
 				if err == nil {
-					fmt.Printf("read %s from <%s>\n", hex.EncodeToString(data[:n]), c.udpConnect.RemoteAddr())
+					fmt.Printf("%s read %s from <%s> to <%s>\n", time.Now(), hex.EncodeToString(data[:n]), c.udpConnect.RemoteAddr(), c.udpConnect.LocalAddr())
 				}
 
 			}
@@ -72,7 +51,6 @@ func (c *UdpClient) Open() {
 				fmt.Println("接收到退出信号2")
 				return
 			default:
-				fmt.Println("协程运行中2...")
 				c.RequestAsync()
 				time.Sleep(3 * time.Second)
 			}
@@ -99,6 +77,34 @@ func (c *UdpClient) request(data []byte) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func (c *UdpClient) ConnectToServer(sIpAddr string, sdoPort int, topicPort int) {
+	// 解析服务器地址
+	udpAddr := &net.UDPAddr{
+		IP:   net.ParseIP(sIpAddr),
+		Port: sdoPort,
+	}
+	// 解析本地地址
+	laddr := &net.UDPAddr{
+		IP:   net.ParseIP("0.0.0.0"),
+		Port: 50004,
+	}
+	//创建连接
+	conn, err := net.DialUDP("udp", laddr, udpAddr)
+	if err != nil {
+		fmt.Println("DialUDP error:", err)
+	}
+
+	c.udpConnect = conn
+	// 创建一个取消上下文和等待组
+	c.ctx, c.cancel = context.WithCancel(context.Background())
+	c.Open()
+	return
+}
+
+func (c *UdpClient) ReadMultiSdoCircle(quarySdo []string) error {
 	return nil
 }
 
@@ -130,7 +136,7 @@ func (c *UdpClient) RequestAsync() error {
 	//	SdoDataTypeEnum.F32)
 	//a = SdoDataTypeEnum.GetRawData(0.3,
 	//	SdoDataTypeEnum.F64)
-	//fmt.Println(a)
+	fmt.Printf("%s write %s to <%s> from <%s>\n", time.Now(), hex.EncodeToString([]byte("\xff\xff\xff\xff\xff\xff\x01\x00\x00\x00 \x00\x01\x00")), c.udpConnect.RemoteAddr(), c.udpConnect.LocalAddr())
 	_, err := c.udpConnect.Write([]byte("\xff\xff\xff\xff\xff\xff\x01\x00\x00\x00 \x00\x01\x00"))
 	if err != nil {
 		return err
