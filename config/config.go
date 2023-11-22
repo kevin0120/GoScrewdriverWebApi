@@ -16,9 +16,15 @@ type Database struct {
 	Password string `json:"password"`
 }
 
+type UdpClient struct {
+	RemoteHost string `json:"remote_host"`
+	RemotePort int    `json:"remote_port"`
+	LocalPort  int    `json:"local_port"`
+}
 type MyConfig struct {
-	OpPort   int       `json:"op_port"`
-	Database *Database `json:"database"`
+	OpPort    int        `json:"op_port"`
+	UdpClient *UdpClient `json:"udp_client"`
+	Database  *Database  `json:"database"`
 }
 
 var Config *MyConfig
@@ -72,8 +78,14 @@ func readConfigFile(filename string, config *MyConfig) error {
 func getDefaultConfig() *MyConfig {
 	// 生成默认配置的逻辑
 	return &MyConfig{
-		OpPort:   4545,
-		Database: &Database{Host: "192.168.10.122", Port: 8082, Username: "ROOT", Password: "!23!QQA"},
+		OpPort: 4545,
+		Database: &Database{Host: "192.168.10.122",
+			Port: 8082, Username: "ROOT",
+			Password: "!23!QQA"},
+		UdpClient: &UdpClient{
+			RemoteHost: "211.254.254.250",
+			RemotePort: 8080,
+			LocalPort:  50004},
 	}
 }
 

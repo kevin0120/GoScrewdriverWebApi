@@ -3,6 +3,7 @@ package opserver
 import (
 	"fmt"
 	"github.com/kevin0120/GoScrewdriverWebApi/config"
+	"github.com/kevin0120/GoScrewdriverWebApi/service/udp/udpclient"
 	"net"
 	"os"
 	"strconv"
@@ -11,7 +12,7 @@ import (
 type Connect struct {
 	start      bool
 	tcpConnect net.Conn
-	udpClient  bool
+	udpClient  *udpclient.UdpClient
 }
 
 func StartOpServe() {
@@ -33,13 +34,19 @@ func StartOpServe() {
 
 	fmt.Println("Server started. Listening on ", addr)
 
+	udp := udpclient.NewClient()
+	udp.Open()
+
 	for {
 		conn, err := listener.Accept()
+		udp.Close()
 		if err != nil {
 			fmt.Println("Error accepting connection:", err.Error())
 			continue
 		}
-		op := &Connect{tcpConnect: conn}
+		op := &Connect{tcpConnect: conn,
+			udpClient: udp,
+		}
 		go op.handleConnection(conn)
 	}
 }
