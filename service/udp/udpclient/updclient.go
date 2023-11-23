@@ -10,6 +10,8 @@ import (
 
 type UdpClient struct {
 	udpConnect *net.UDPConn
+	connected  bool
+	heardCnt   uint
 	rid        int
 	timeoutMs  int
 	ctx        context.Context
@@ -20,13 +22,15 @@ func NewClient(timeoutMs int) *UdpClient {
 	client := UdpClient{
 		timeoutMs: timeoutMs,
 		rid:       0,
+		connected: false,
+		heardCnt:  1,
 	}
 	//go client.Heart()
 	return &client
 }
 
 func (c *UdpClient) Open() {
-	data := make([]byte, 1024)
+	data := make([]byte, 2048)
 	go func() {
 		for {
 			select {
@@ -37,7 +41,7 @@ func (c *UdpClient) Open() {
 				c.udpConnect.SetReadDeadline(time.Now().Add(3 * time.Second))
 				n, err := c.udpConnect.Read(data)
 				if err == nil {
-					fmt.Printf("%s read %s from <%s> to <%s>\n", time.Now(), hex.EncodeToString(data[:n]), c.udpConnect.RemoteAddr(), c.udpConnect.LocalAddr())
+					c.HandleReceive(data[:n])
 				}
 
 			}
@@ -51,33 +55,14 @@ func (c *UdpClient) Open() {
 				fmt.Println("接收到退出信号2")
 				return
 			default:
-				c.RequestAsync()
+				c.runHeart()
 				time.Sleep(3 * time.Second)
 			}
-
 		}
 	}()
-
 }
 func (c *UdpClient) Close() {
 	c.cancel()
-}
-
-func (c *UdpClient) requestId() int {
-	c.rid++
-	return c.rid
-}
-
-func (c *UdpClient) HandleReceive() {
-
-}
-
-func (c *UdpClient) request(data []byte) error {
-	_, err := c.udpConnect.Write(data)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func (c *UdpClient) ConnectToServer(sIpAddr string, sdoPort int, topicPort int) {
