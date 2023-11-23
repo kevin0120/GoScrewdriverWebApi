@@ -23,7 +23,6 @@ const (
 	ByteArray     = 14
 	Remap         = 15
 )
-
 const (
 	MSdo        = 0x0001
 	QSdo        = 0x0002

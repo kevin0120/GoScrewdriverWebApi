@@ -2,7 +2,6 @@ package udpclient
 
 import (
 	"context"
-	"encoding/hex"
 	"fmt"
 	"net"
 	"time"
@@ -121,11 +120,7 @@ func (c *UdpClient) RequestAsync() error {
 	//	SdoDataTypeEnum.F32)
 	//a = SdoDataTypeEnum.GetRawData(0.3,
 	//	SdoDataTypeEnum.F64)
-	fmt.Printf("%s write %s to <%s> from <%s>\n", time.Now(), hex.EncodeToString([]byte("\xff\xff\xff\xff\xff\xff\x01\x00\x00\x00 \x00\x01\x00")), c.udpConnect.RemoteAddr(), c.udpConnect.LocalAddr())
-	_, err := c.udpConnect.Write([]byte("\xff\xff\xff\xff\xff\xff\x01\x00\x00\x00 \x00\x01\x00"))
-	if err != nil {
-		return err
-	}
+
 	return nil
 }
 
