@@ -1,4 +1,4 @@
-package udp
+package udps
 
 import (
 	"golang.org/x/text/encoding/simplifiedchinese"

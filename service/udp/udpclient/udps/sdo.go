@@ -1,4 +1,4 @@
-package udp
+package udps
 
 type Sdo struct {
 	sdoKey   string

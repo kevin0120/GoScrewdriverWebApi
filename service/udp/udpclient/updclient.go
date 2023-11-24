@@ -3,26 +3,29 @@ package udpclient
 import (
 	"context"
 	"fmt"
+	"github.com/kevin0120/GoScrewdriverWebApi/service/udp/udpclient/udps"
 	"net"
 	"time"
 )
 
 type UdpClient struct {
-	udpConnect *net.UDPConn
-	connected  bool
-	heardCnt   uint
-	rid        int
-	timeoutMs  int
-	ctx        context.Context
-	cancel     context.CancelFunc
+	udpConnect  *net.UDPConn
+	connected   bool
+	heardCnt    uint
+	recvBuffMap map[int]*udps.SyncUdpFuturePack
+	rid         int
+	timeoutMs   int
+	ctx         context.Context
+	cancel      context.CancelFunc
 }
 
 func NewClient(timeoutMs int) *UdpClient {
 	client := UdpClient{
-		timeoutMs: timeoutMs,
-		rid:       0,
-		connected: false,
-		heardCnt:  1,
+		timeoutMs:   timeoutMs,
+		recvBuffMap: map[int]*udps.SyncUdpFuturePack{},
+		rid:         0,
+		connected:   false,
+		heardCnt:    1,
 	}
 	//go client.Heart()
 	return &client
@@ -42,7 +45,6 @@ func (c *UdpClient) Open() {
 				if err == nil {
 					c.HandleReceive(data[:n])
 				}
-
 			}
 		}
 	}()
