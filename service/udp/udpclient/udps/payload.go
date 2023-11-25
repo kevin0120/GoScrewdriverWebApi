@@ -44,49 +44,91 @@ func Raw2Value(data []byte, dataType int) interface{} {
 	var r interface{}
 	switch dataType {
 	case Bool:
-		r = data[0] == 0x01
+		r = false
+		if len(data) == 1 {
+			r = data[0] == 0x01
+		}
 		break
 	case I8:
-		r = int8(data[0])
+		r = 0
+		if len(data) == 1 {
+			r = int8(data[0])
+		}
 		break
 	case U8:
-		r = data[0]
+		r = 0
+		if len(data) == 1 {
+			r = data[0]
+		}
 		break
 	case I16:
-		r = int16(binary.LittleEndian.Uint16(data))
+		r = 0
+		if len(data) == 2 {
+			r = int16(binary.LittleEndian.Uint16(data))
+		}
 		break
 	case U16:
-		r = binary.LittleEndian.Uint16(data)
+		r = 0
+		if len(data) == 2 {
+			r = binary.LittleEndian.Uint16(data)
+		}
 		break
 	case I32:
-		r = int32(binary.LittleEndian.Uint32(data))
+		r = 0
+		if len(data) == 4 {
+			r = int32(binary.LittleEndian.Uint32(data))
+		}
 		break
 	case U32:
-		r = binary.LittleEndian.Uint32(data)
+		r = false
+		if len(data) == 4 {
+			r = binary.LittleEndian.Uint32(data)
+		}
 		break
 	case I64:
-		r = int64(binary.LittleEndian.Uint64(data))
+		r = 0
+		if len(data) == 8 {
+			r = int64(binary.LittleEndian.Uint64(data))
+		}
 		break
 	case U64:
-		r = binary.LittleEndian.Uint64(data)
+		r = 0
+		if len(data) == 8 {
+			r = binary.LittleEndian.Uint64(data)
+		}
 		break
 
 	case F32:
-		r = math.Float32frombits(binary.LittleEndian.Uint32(data))
+		r = 0.0
+		if len(data) == 4 {
+			r = math.Float32frombits(binary.LittleEndian.Uint32(data))
+		}
 		break
 	case F64:
-		r = math.Float64frombits(binary.LittleEndian.Uint64(data))
+		r = 0.0
+		if len(data) == 8 {
+			r = math.Float64frombits(binary.LittleEndian.Uint64(data))
+		}
 		break
 	case String:
-		r = string(data[:len(data)-1])
+		r = ""
+		if len(data) >= 1 {
+			r = string(data[:len(data)-1])
+		}
 		break
 	case StringUnicode:
-		decoder := simplifiedchinese.GBK.NewDecoder()
-		decodedBuff, _ := decoder.Bytes(data)
-		r = string(decodedBuff[:len(decodedBuff)-1])
+		r = ""
+		if len(data) >= 1 {
+			decoder := simplifiedchinese.GBK.NewDecoder()
+			decodedBuff, _ := decoder.Bytes(data)
+			r = string(decodedBuff[:len(decodedBuff)-1])
+		}
 		break
 	case ByteArray:
-		r = data[4:]
+		r = []byte("")
+		if len(data) >= 4 {
+			r = data[4:]
+		}
 		break
 
 	case Remap:
