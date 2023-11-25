@@ -26,14 +26,14 @@ type FutureData struct {
 	errCode string
 }
 type SyncUdpFuturePack struct {
-	rid          int
+	rid          int32
 	buffCacheMap map[int][]byte
 	futureData   *FutureData
 	futureChan   chan *FutureData
 	Head         string
 }
 
-func NewFuturePack(rid int) *SyncUdpFuturePack {
+func NewFuturePack(rid int32) *SyncUdpFuturePack {
 	return &SyncUdpFuturePack{
 		rid:        rid,
 		futureData: &FutureData{},

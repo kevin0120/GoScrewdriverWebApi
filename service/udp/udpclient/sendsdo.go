@@ -1,7 +1,6 @@
 package udpclient
 
 import (
-	"encoding/binary"
 	"fmt"
 	"github.com/kevin0120/GoScrewdriverWebApi/service/udp/udpclient/udps"
 	"time"
@@ -15,7 +14,7 @@ func (c *UdpClient) ReadMultiSdo() error {
 	return nil
 }
 
-func (c *UdpClient) requestId() int {
+func (c *UdpClient) requestId() int32 {
 	c.rid++
 	return c.rid
 }
@@ -47,7 +46,7 @@ func (c *UdpClient) send(data []byte) error {
 }
 
 func (c *UdpClient) request(data []byte) *udps.FutureData {
-	rid := int(binary.LittleEndian.Uint32(data[4:8]))
+	rid := udps.Raw2Value(data[4:8], udps.I32).(int32)
 	pack := udps.NewFuturePack(rid)
 	if _, ok := c.recvBuffMap[rid]; ok {
 		c.recvBuffMap[rid].TimeOut()

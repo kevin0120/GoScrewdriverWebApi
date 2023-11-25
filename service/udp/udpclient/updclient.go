@@ -11,9 +11,9 @@ import (
 type UdpClient struct {
 	udpConnect  *net.UDPConn
 	connected   bool
-	heardCnt    uint
-	recvBuffMap map[int]*udps.SyncUdpFuturePack
-	rid         int
+	heardCnt    uint32
+	recvBuffMap map[int32]*udps.SyncUdpFuturePack
+	rid         int32
 	timeoutMs   int
 	ctx         context.Context
 	cancel      context.CancelFunc
@@ -22,7 +22,7 @@ type UdpClient struct {
 func NewClient(timeoutMs int) *UdpClient {
 	client := UdpClient{
 		timeoutMs:   timeoutMs,
-		recvBuffMap: map[int]*udps.SyncUdpFuturePack{},
+		recvBuffMap: map[int32]*udps.SyncUdpFuturePack{},
 		rid:         0,
 		connected:   false,
 		heardCnt:    1,
