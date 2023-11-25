@@ -44,7 +44,10 @@ func NewFuturePack(rid int32) *SyncUdpFuturePack {
 		Head:         []byte(""),
 	}
 }
-func (c *SyncUdpFuturePack) close() {
+
+//Close 手动关闭一下,遇到连续两次相同请求时
+func (c *SyncUdpFuturePack) Close() {
+	c.timeOut()
 	return
 }
 
@@ -90,7 +93,7 @@ func (c *SyncUdpFuturePack) setResult() {
 	return
 }
 
-// timeOut 长时间没收到或没收全,调用
+// timeOut 长时间没收到或没收全,调用  ps 当连续两次产生同意请求时,也把原来的对象timeout
 func (c *SyncUdpFuturePack) timeOut() {
 	c.futureData.result = FAILED
 	c.futureChan <- c.futureData

@@ -49,7 +49,7 @@ func (c *UdpClient) request(data []byte) *udps.FutureData {
 	rid := udps.Raw2Value(data[4:8], udps.I32).(int32)
 	pack := udps.NewFuturePack(rid)
 	if _, ok := c.recvBuffMap[rid]; ok {
-		c.recvBuffMap[rid].TimeOut()
+		c.recvBuffMap[rid].Close()
 	}
 	c.recvBuffMap[rid] = pack
 	//rid := udps.raw2Value(data, SdoDataTypeEnum.U32)
