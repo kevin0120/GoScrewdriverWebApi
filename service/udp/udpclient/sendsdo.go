@@ -6,14 +6,6 @@ import (
 	"time"
 )
 
-func (c *UdpClient) ReadSingleSdo() error {
-	return nil
-}
-
-func (c *UdpClient) ReadMultiSdo() error {
-	return nil
-}
-
 func (c *UdpClient) requestId() int32 {
 	c.rid++
 	return c.rid
@@ -85,4 +77,31 @@ func (c *UdpClient) runHeart() {
 		}
 		c.connected = ret.IsSuccess()
 	}
+}
+
+func (c *UdpClient) ReadSingleSdo() error {
+	return nil
+}
+
+func (c *UdpClient) ReadMultiSdo() error {
+	return nil
+}
+
+func (c *UdpClient) ReadSdoDefines() error {
+	return nil
+}
+
+func (c *UdpClient) ReadSubTopics() error {
+	return nil
+}
+
+func (c *UdpClient) ReadJson() error {
+	return nil
+}
+func (c *UdpClient) WriteSingleSdo() error {
+	return nil
+}
+
+func (c *UdpClient) WriteMultiSdo() error {
+	return nil
 }
