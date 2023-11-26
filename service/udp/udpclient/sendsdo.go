@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func (c *UdpClient) requestId() int32 {
+func (c *UdpClient) requestId() uint32 {
 	c.rid++
 	return c.rid
 }
@@ -79,29 +79,31 @@ func (c *UdpClient) runHeart() {
 	}
 }
 
-func (c *UdpClient) ReadSingleSdo() error {
+func (c *UdpClient) ReadSingleSdo(sdoKey string) (error, *udps.Sdo) {
+	buff := c.request(udps.SdoPack(udps.GetRawData(sdoKey, udps.String), udps.QSdo, c.requestId()))
+	fmt.Println(buff)
+	return nil, nil
+}
+
+func (c *UdpClient) ReadMultiSdo(sdoKeys []string) (error, map[string]udps.Sdo) {
+	return nil, nil
+}
+
+func (c *UdpClient) ReadSdoDefines() (error, map[string]udps.Sdo) {
+	return nil, nil
+}
+
+func (c *UdpClient) ReadSubTopics() (error, map[string]udps.Sdo) {
+	return nil, nil
+}
+
+func (c *UdpClient) ReadJson() (error, string) {
+	return nil, ""
+}
+func (c *UdpClient) WriteSingleSdo(sdo *udps.Sdo) error {
 	return nil
 }
 
-func (c *UdpClient) ReadMultiSdo() error {
-	return nil
-}
-
-func (c *UdpClient) ReadSdoDefines() error {
-	return nil
-}
-
-func (c *UdpClient) ReadSubTopics() error {
-	return nil
-}
-
-func (c *UdpClient) ReadJson() error {
-	return nil
-}
-func (c *UdpClient) WriteSingleSdo() error {
-	return nil
-}
-
-func (c *UdpClient) WriteMultiSdo() error {
-	return nil
+func (c *UdpClient) WriteMultiSdo(sdoList []*udps.Sdo) (error, map[string]int) {
+	return nil, nil
 }
