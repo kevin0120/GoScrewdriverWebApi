@@ -60,28 +60,29 @@ func (c *UdpClient) request(data []byte) *udps.FutureData {
 }
 
 func (c *UdpClient) connect() {
-	_ = c.request([]byte("\xff\xff\xff\xff\x01\x00\x00\x00 \x00\x01\x00"))
-	//if ret.result == SUCCESS and ret.content[-2:] == ""\x00\x00':
-	//FILE_LOG.debug(f'udp send connection buff success !!!')
-	//self.connected = True
+	connBuff := append(append([]byte(udps.SinglePackBytes), udps.GetRawData(c.requestId(), udps.I32)...), []byte(" \x00\x01\x00")...)
+	ret := c.request(connBuff)
+	if ret.Result == udps.SUCCESS && udps.Raw2Value(ret.Content[len(ret.Content)-2:], udps.U16) == uint16(0x0000) {
+		c.connected = true
+	}
 	return
 }
 func (c *UdpClient) heartBuff() []byte {
-	return nil
+	return append(append(append([]byte(udps.SinglePackBytes), udps.GetRawData(c.requestId(), udps.I32)...), udps.GetRawData(0, udps.U16)...), udps.GetRawData(c.heardCnt, udps.U32)...)
 }
 func (c *UdpClient) runHeart() {
 	if !c.connected {
 		c.connect()
 		if c.connected {
-			fmt.Println("Udp Is Connected!")
+			fmt.Printf("%s udp connected successfully \n ", time.Now())
 		}
 	} else {
 		hrtBuff := c.heartBuff()
 		c.heardCnt += 1
 		ret := c.request(hrtBuff)
-		fmt.Println(ret)
-		//if !ret.isSuccess {
-		//	c.connected = ret.isSuccess
-		//}
+		if !ret.IsSuccess() {
+			fmt.Printf("%s udp connected off \n ", time.Now())
+		}
+		c.connected = ret.IsSuccess()
 	}
 }
