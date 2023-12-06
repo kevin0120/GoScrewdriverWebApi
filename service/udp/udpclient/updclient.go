@@ -13,7 +13,7 @@ type UdpClient struct {
 	connected   bool
 	heardCnt    uint32
 	recvBuffMap map[int32]*udps.SyncUdpFuturePack
-	rid         int32
+	rid         uint32
 	timeoutMs   int
 	ctx         context.Context
 	cancel      context.CancelFunc
