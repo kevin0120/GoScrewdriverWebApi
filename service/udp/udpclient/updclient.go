@@ -56,7 +56,7 @@ func (c *UdpClient) Open() {
 				fmt.Println("接收到退出信号2")
 				return
 			default:
-				c.runHeart()
+				go c.runHeart()
 				time.Sleep(3 * time.Second)
 			}
 		}
@@ -75,7 +75,7 @@ func (c *UdpClient) ConnectToServer(sIpAddr string, sdoPort int, topicPort int) 
 	// 解析本地地址
 	laddr := &net.UDPAddr{
 		IP:   net.ParseIP("0.0.0.0"),
-		Port: 50004,
+		Port: 50005,
 	}
 	//创建连接
 	conn, err := net.DialUDP("udp", laddr, udpAddr)
