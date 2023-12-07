@@ -2,8 +2,7 @@ package openprotocol
 
 import (
 	"fmt"
-	"github.com/masami10/rush/services/io"
-	"github.com/masami10/rush/services/tightening_device"
+	"github.com/kevin0120/GoScrewdriverWebApi/service/opclient/tightening_device"
 	"github.com/pkg/errors"
 	"strconv"
 	"strings"
@@ -238,14 +237,6 @@ func (iom *IOMonitor) Deserialize(str string) error {
 	iom.Inputs = str
 
 	return nil
-}
-
-func (iom *IOMonitor) ToIOInput() io.IoContact {
-	return io.IoContact{
-		Src:    tightening_device.TIGHTENING_DEVICE_TYPE_CONTROLLER,
-		SN:     iom.ControllerSN,
-		Inputs: iom.Inputs,
-	}
 }
 
 //type baseResultData struct {

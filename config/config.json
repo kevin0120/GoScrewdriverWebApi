@@ -1,8 +1,37 @@
 {
+  "op_port": 4545,
+  "udp_client": {
+    "remote_host": "211.254.254.250",
+    "remote_port": 8080,
+    "local_port": 50004
+  },
   "database": {
     "host": "192.168.10.122",
     "port": 8082,
     "username": "ROOT",
     "password": "!23!QQA"
+  },
+  "tightening_device": {
+    "enable": true,
+    "socket_selector": {
+      "enable": false,
+      "endpoint": ""
+    },
+    "devices": [
+      {
+        "model": "ModelDesoutterCvi3",
+        "protocol": "OpenProtocol",
+        "endpoint": "tcp://192.168.5.232:4545",
+        "sn": "ControllerSn",
+        "name": "ControllerName",
+        "children": [
+          {
+            "sn": "ToolSn",
+            "channel": 2,
+            "endpoint": "tcp://192.168.0.26:4545"
+          }
+        ]
+      }
+    ]
   }
 }

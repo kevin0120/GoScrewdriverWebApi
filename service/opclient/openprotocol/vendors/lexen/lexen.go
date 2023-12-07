@@ -2,7 +2,7 @@ package lexen
 
 import (
 	"fmt"
-	"github.com/masami10/rush/services/openprotocol"
+	"github.com/kevin0120/GoScrewdriverWebApi/service/opclient/openprotocol"
 )
 
 var midHandlers = map[string]openprotocol.MidHandler{
@@ -33,7 +33,7 @@ type Controller struct {
 func (c *Controller) GetMidHandler(mid string) (openprotocol.MidHandler, error) {
 	h, exist := midHandlers[mid]
 	if !exist {
-		return nil, fmt.Errorf("Handler Not Found, Mid: %s", mid)
+		return nil, fmt.Errorf("handler Not Found, Mid: %s", mid)
 	}
 
 	return h, nil

@@ -1,8 +1,7 @@
 package desoutter
 
 import (
-	"github.com/masami10/rush/services/io"
-	"github.com/masami10/rush/services/openprotocol"
+	"github.com/kevin0120/GoScrewdriverWebApi/service/opclient/openprotocol"
 )
 
 type CVI3Controller struct {
@@ -46,11 +45,6 @@ func (c *CVI3Controller) GetVendorModel() map[string]interface{} {
 
 		openprotocol.MID_7408_LAST_CURVE_SUBSCRIBE: "001",
 		openprotocol.MID_7411_LAST_CURVE_DATA_ACK:  "001",
-
-		openprotocol.IoModel: io.IoConfig{
-			InputNum:  8,
-			OutputNum: 8,
-		},
 	}
 
 	return vendorModels

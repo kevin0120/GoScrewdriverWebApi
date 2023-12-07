@@ -32,21 +32,37 @@ type ToolConfig struct {
 }
 
 type SocketSelectorConfig struct {
-	Enable   bool   `yaml:"enable"`
-	Endpoint string `yaml:"endpoint"`
+	Enable   bool   `yaml:"enable" json:"enable"`
+	Endpoint string `yaml:"endpoint" json:"endpoint"`
 }
 
 type Config struct {
-	Enable         bool                     `yaml:"enable"`
-	SocketSelector SocketSelectorConfig     `yaml:"socket_selector"`
-	Devices        []TighteningDeviceConfig `yaml:"devices"`
+	Enable         bool                     `yaml:"enable" json:"enable"`
+	SocketSelector SocketSelectorConfig     `yaml:"socket_selector" json:"socket_selector"`
+	Devices        []TighteningDeviceConfig `yaml:"devices" json:"devices"`
 }
 
 func NewConfig() Config {
 
 	return Config{
-		Enable:  true,
-		Devices: []TighteningDeviceConfig{},
+		Enable: true,
+		Devices: []TighteningDeviceConfig{
+
+			{
+				Model:          ModelDesoutterCvi3,
+				Protocol:       "OpenProtocol",
+				Endpoint:       "tcp://192.168.5.232:4545",
+				SN:             "ControllerSn",
+				ControllerName: "ControllerName",
+				Tools: []ToolConfig{
+					{
+						SN:       "ToolSn",
+						Endpoint: "tcp://192.168.0.26:4545",
+						Channel:  1,
+					},
+				},
+			},
+		},
 	}
 }
 

@@ -52,7 +52,7 @@ func (c *UdpClient) request(data []byte) *udps.FutureData {
 }
 
 func (c *UdpClient) connect() {
-	connBuff := append(append([]byte(udps.SinglePackBytes), udps.GetRawData(c.requestId(), udps.I32)...), []byte(" \x00\x01\x00")...)
+	connBuff := append(append([]byte(udps.SinglePackBytes), udps.GetRawData(c.requestId(), udps.U32)...), []byte(" \x00\x01\x00")...)
 	ret := c.request(connBuff)
 	if ret.Result == udps.SUCCESS && udps.Raw2Value(ret.Content[len(ret.Content)-2:], udps.U16) == uint16(0x0000) {
 		c.connected = true

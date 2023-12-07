@@ -1,10 +1,7 @@
 package lexen
 
 import (
-	"errors"
-	"github.com/masami10/rush/services/io"
-	"github.com/masami10/rush/services/openprotocol"
-	"github.com/masami10/rush/services/tightening_device"
+	"github.com/kevin0120/GoScrewdriverWebApi/service/opclient/openprotocol"
 	"time"
 )
 
@@ -37,35 +34,9 @@ func (c *WrenchController) GetVendorModel() map[string]interface{} {
 
 		//openprotocol.MID_7408_LAST_CURVE_SUBSCRIBE: "001",
 		openprotocol.MID_7411_LAST_CURVE_DATA_ACK: "001",
-
-		openprotocol.IoModel: io.IoConfig{
-			InputNum:  0,
-			OutputNum: 0,
-		},
 	}
 
 	return vendorModels
-}
-
-// 可重写所有TighteningController中的方法
-func (c *WrenchController) GetToolViaChannel(channel int) (tightening_device.ITighteningTool, error) {
-	for _, v := range c.Children() {
-		return v.(tightening_device.ITighteningTool), nil
-	}
-
-	return nil, errors.New("WrenchController.GetToolViaChannel: Tool Not Found")
-}
-
-func (c *WrenchController) HandleStatus(sn string, status string) {
-	c.TighteningController.HandleStatus(sn, status)
-
-	for _, tool := range c.Children() {
-		tool.(*openprotocol.TighteningTool).UpdateStatus(status)
-	}
-}
-
-func (c *WrenchController) CreateIO() tightening_device.ITighteningIO {
-	return nil
 }
 
 func (c *WrenchController) OpenProtocolParams() *openprotocol.OpenProtocolParams {

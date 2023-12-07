@@ -1,16 +1,12 @@
 package tightening_device
 
 import (
-	"context"
-	"fmt"
-	"github.com/masami10/rush/services/storage"
-	"github.com/masami10/rush/utils"
 	"github.com/pkg/errors"
 	"strings"
 )
 
-var ENV_PSET_BATCH_ENABLE = utils.GetEnvBool("ENV_PSET_BATCH_ENABLE", true)
-var ENV_PSET_WITH_ENABLE = utils.GetEnvBool("ENV_PSET_WITH_ENABLE", true)
+var EnvPsetBatchEnable = true
+var EnvPsetWithEnable = true
 
 type JobSet struct {
 	ControllerSN string `json:"controller_sn"`
@@ -83,12 +79,12 @@ func (s *Service) ToolControl(req *ToolControl) error {
 		return errors.New("Req Is Nil")
 	}
 
-	tool, err := s.getTool(req.ControllerSN, req.ToolSN)
+	_, err := s.getTool(req.ControllerSN, req.ToolSN)
 	if err != nil {
 		return err
 	}
-
-	return tool.ToolControl(req.Enable)
+	return nil
+	//return tool.ToolControl(req.Enable)
 }
 
 func (s *Service) ToolJobSet(req *JobSet) error {
@@ -101,7 +97,7 @@ func (s *Service) ToolJobSet(req *JobSet) error {
 		return err
 	}
 
-	tool, err := s.getTool(req.ControllerSN, req.ToolSN)
+	_, err = s.getTool(req.ControllerSN, req.ToolSN)
 	if err != nil {
 		return err
 	}
@@ -109,15 +105,8 @@ func (s *Service) ToolJobSet(req *JobSet) error {
 	if req.UserID == 0 {
 		req.UserID = 1
 	}
-
-	_ = s.storageService.UpdateTool(&storage.Tools{
-		Serial:             req.ToolSN,
-		CurrentWorkorderID: req.WorkorderID,
-		Total:              req.Total,
-		UserID:             req.UserID,
-	})
-
-	return tool.SetJob(req.Job)
+	return nil
+	//return tool.SetJob(req.Job)
 }
 
 func (s *Service) ToolPSetBatchSet(req *PSetBatchSet) error {
@@ -129,51 +118,20 @@ func (s *Service) ToolPSetBatchSet(req *PSetBatchSet) error {
 		return errors.New("ToolPSetBatchSet Pset Must Be Greater Than Zero")
 	}
 
-	tool, err := s.getTool(req.ControllerSN, req.ToolSN)
+	_, err := s.getTool(req.ControllerSN, req.ToolSN)
 	if err != nil {
 		return err
 	}
-
-	return tool.SetPSetBatch(req.PSet, req.Batch)
+	return nil
+	//return tool.SetPSetBatch(req.PSet, req.Batch)
 }
 
 func (s *Service) doTraceFromPSetReq(req *PSetSet) {
-	var orderid int64
-	var stepid int64
 
 	if req.UserID == 0 {
 		req.UserID = 1
 	}
 
-	if req.WorkorderCode != "" {
-		order, err := s.storageService.GetWorkorderByCode(req.WorkorderCode)
-		if err != nil {
-			s.diag.Error("doTraceFromPSetReq.GetWorkorderByCode Failed", err)
-		} else {
-			orderid = order.Id
-		}
-	}
-
-	if req.StepCode != "" {
-		step, err := s.storageService.GetStepByCodeAndWorkorderID(req.StepCode, orderid)
-		if err != nil {
-			s.diag.Error("doTraceFromPSetReq.GetStepByCodeAndWorkorderID Failed", err)
-		} else {
-			stepid = step.Id
-		}
-	}
-
-	_ = s.storageService.UpdateTool(&storage.Tools{
-		Serial:             req.ToolSN,
-		CurrentWorkorderID: orderid,
-		Seq:                int(req.Sequence),
-		Count:              req.Count,
-		UserID:             req.UserID,
-		Total:              req.Total,
-		StepID:             stepid,
-		ScannerCode:        req.ScannerCode,
-		Batch:              req.Batch,
-	})
 }
 
 func (s *Service) ToolPSetByIP(req *PSetSet) error {
@@ -181,9 +139,8 @@ func (s *Service) ToolPSetByIP(req *PSetSet) error {
 		return errors.New("ToolPSetByIP Req Is Nil")
 	}
 
-	tool, err := s.findToolbyIP(req.IP)
+	_, err := s.findToolbyIP(req.IP)
 	if err != nil {
-		s.diag.Error("doTraceFromPSetReq.GetStepByCodeAndWorkorderID Failed", err)
 		return err
 	}
 
@@ -191,36 +148,25 @@ func (s *Service) ToolPSetByIP(req *PSetSet) error {
 		req.UserID = 1
 	}
 
-	controller := tool.GetParentService().(ITighteningController)
+	//controller := tool.GetParentService().(ITighteningController)
 	if err = s.ToolPSetBatchSet(&PSetBatchSet{
-		ControllerSN: controller.SerialNumber(),
-		ToolSN:       tool.SerialNumber(),
-		PSet:         req.PSet,
-		Batch:        1,
+		//ControllerSN: controller.SerialNumber(),
+		//ToolSN:       tool.SerialNumber(),
+		PSet:  req.PSet,
+		Batch: 1,
 	}); err != nil {
-		s.diag.Error("PSet Batch Set Failed", err)
+		//s.diag.Error("PSet Batch Set Failed", err)
 	}
 
-	err = s.storageService.UpdateTool(&storage.Tools{
-		Serial:  tool.SerialNumber(),
-		Seq:     int(req.Sequence),
-		Count:   req.Count,
-		UserID:  req.UserID,
-		Total:   req.Total,
-		PointID: req.PointID,
-	})
-	if err != nil {
-		s.diag.Error("UpdateTool Error ", err)
-		return err
-	}
 	return nil
 }
 
 func (s *Service) ToolPSetSet(req *PSetSet) error {
 
 	dopset := func(tool ITighteningTool) error {
-		ctx := context.WithValue(context.Background(), "psetReq", req)
-		return tool.SetPSet(ctx, req.PSet)
+		//ctx := context.WithValue(context.Background(), "psetReq", req)
+		return nil
+		//return tool.SetPSet(ctx, req.PSet)
 	}
 
 	if req == nil {
@@ -243,7 +189,7 @@ func (s *Service) ToolPSetSet(req *PSetSet) error {
 		return errors.New("ToolPSetSet.ToolPSetBatchSet Pset Must Be Greater Than 0!!!")
 	}
 
-	if ENV_PSET_BATCH_ENABLE {
+	if EnvPsetBatchEnable {
 		err := s.ToolPSetBatchSet(&PSetBatchSet{
 			ControllerSN: req.ControllerSN,
 			ToolSN:       req.ToolSN,
@@ -252,7 +198,6 @@ func (s *Service) ToolPSetSet(req *PSetSet) error {
 		})
 		if err != nil {
 			if !strings.Contains(err.Error(), TIGHTENING_ERR_NOT_SUPPORTED) {
-				s.diag.Error("ToolPSetSet.ToolPSetBatchSet", err)
 				return err
 			} else {
 				if err := dopset(tool); err != nil {
@@ -282,11 +227,11 @@ func (s *Service) ToolPSetSet(req *PSetSet) error {
 	// 	return err
 	// }
 
-	if req.Enable || ENV_PSET_WITH_ENABLE {
-		_ = tool.ToolControl(true)
+	if req.Enable || EnvPsetWithEnable {
+		//_ = tool.ToolControl(true)
 	}
 
-	s.diag.Info(fmt.Sprintf("Pset Request Pset Number: %d Success!!!", req.PSet))
+	//s.diag.Info(fmt.Sprintf("Pset Request Pset Number: %d Success!!!", req.PSet))
 
 	return nil
 }
@@ -301,12 +246,13 @@ func (s *Service) ToolModeSelect(req *ToolModeSelect) error {
 		return err
 	}
 
-	tool, err := s.getTool(req.ControllerSN, req.ToolSN)
+	_, err = s.getTool(req.ControllerSN, req.ToolSN)
 	if err != nil {
 		return err
 	}
 
-	return tool.ModeSelect(req.Mode)
+	return nil
+	//return tool.ModeSelect(req.Mode)
 }
 
 type ToolInfo struct {
@@ -329,12 +275,12 @@ func (s *Service) GetToolPSetList(req *ToolInfo) ([]PSetInfo, error) {
 		return nil, errors.New("Req Is Nil")
 	}
 
-	tool, err := s.getTool(req.ControllerSN, req.ToolSN)
+	_, err := s.getTool(req.ControllerSN, req.ToolSN)
 	if err != nil {
 		return nil, err
 	}
-
-	return tool.GetPSetList()
+	return nil, nil
+	//return tool.GetPSetList()
 }
 
 func (s *Service) GetToolPSetDetail(req *ToolPSet) (*PSetDetail, error) {
@@ -342,12 +288,12 @@ func (s *Service) GetToolPSetDetail(req *ToolPSet) (*PSetDetail, error) {
 		return nil, errors.New("Req Is Nil")
 	}
 
-	tool, err := s.getTool(req.ControllerSN, req.ToolSN)
+	_, err := s.getTool(req.ControllerSN, req.ToolSN)
 	if err != nil {
 		return nil, err
 	}
-
-	return tool.GetPSetDetail(req.PSet)
+	return nil, nil
+	//return tool.GetPSetDetail(req.PSet)
 }
 
 func (s *Service) GetToolJobList(req *ToolInfo) ([]int, error) {
@@ -355,12 +301,13 @@ func (s *Service) GetToolJobList(req *ToolInfo) ([]int, error) {
 		return nil, errors.New("Req Is Nil")
 	}
 
-	tool, err := s.getTool(req.ControllerSN, req.ToolSN)
+	_, err := s.getTool(req.ControllerSN, req.ToolSN)
 	if err != nil {
 		return nil, err
 	}
 
-	return tool.GetJobList()
+	return nil, nil
+	//return tool.GetJobList()
 }
 
 func (s *Service) GetToolJobDetail(req *ToolJob) (*JobDetail, error) {
@@ -368,21 +315,22 @@ func (s *Service) GetToolJobDetail(req *ToolJob) (*JobDetail, error) {
 		return nil, errors.New("Req Is Nil")
 	}
 
-	tool, err := s.getTool(req.ControllerSN, req.ToolSN)
+	_, err := s.getTool(req.ControllerSN, req.ToolSN)
 	if err != nil {
 		return nil, err
 	}
 
-	return tool.GetJobDetail(req.Job)
+	return nil, nil
+	//return tool.GetJobDetail(req.Job)
 }
 
 func (s *Service) findToolbyIP(ip string) (ITighteningTool, error) {
-	for _, controller := range s.runningControllers {
-		tool, err := controller.GetToolViaIP(ip)
-		if err == nil {
-			return tool, nil
-		}
-	}
+	//for _, controller := range s.runningControllers {
+	//	tool, err := controller.GetToolViaIP(ip)
+	//	if err == nil {
+	//		return tool, nil
+	//	}
+	//}
 
 	return nil, errors.New("findToolbyIP: Not Found")
 }

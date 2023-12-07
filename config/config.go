@@ -3,6 +3,8 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/kevin0120/GoScrewdriverWebApi/service/opclient/openprotocol"
+	"github.com/kevin0120/GoScrewdriverWebApi/service/opclient/tightening_device"
 	"io/fs"
 	"io/ioutil"
 	"os"
@@ -22,9 +24,11 @@ type UdpClient struct {
 	LocalPort  int    `json:"local_port"`
 }
 type MyConfig struct {
-	OpPort    int        `json:"op_port"`
-	UdpClient *UdpClient `json:"udp_client"`
-	Database  *Database  `json:"database"`
+	OpPort           int                      `json:"op_port"`
+	UdpClient        *UdpClient               `json:"udp_client"`
+	Database         *Database                `json:"database"`
+	TighteningDevice tightening_device.Config `json:"tightening_device"`
+	OpenProtocol     openprotocol.Config      `json:"openprotocol"`
 }
 
 var Config *MyConfig
@@ -86,6 +90,8 @@ func getDefaultConfig() *MyConfig {
 			RemoteHost: "211.254.254.250",
 			RemotePort: 8080,
 			LocalPort:  50004},
+		TighteningDevice: tightening_device.NewConfig(),
+		OpenProtocol:     openprotocol.NewConfig(),
 	}
 }
 

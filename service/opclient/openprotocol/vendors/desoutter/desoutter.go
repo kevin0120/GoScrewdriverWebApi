@@ -2,7 +2,7 @@ package desoutter
 
 import (
 	"fmt"
-	"github.com/masami10/rush/services/openprotocol"
+	"github.com/kevin0120/GoScrewdriverWebApi/service/opclient/openprotocol"
 )
 
 type Controller struct {

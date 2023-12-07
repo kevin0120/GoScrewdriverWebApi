@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/kevin0120/GoScrewdriverWebApi/config"
+	"github.com/kevin0120/GoScrewdriverWebApi/service/opclient/openprotocol"
+	"github.com/kevin0120/GoScrewdriverWebApi/service/opclient/openprotocol/vendors"
 	"github.com/kevin0120/GoScrewdriverWebApi/service/opclient/tightening_device"
 	"os"
 	"os/signal"
@@ -22,11 +25,17 @@ func exit() {
 func main() {
 	// 获取命令行输入的参数
 	// 检查是否至少有一个参数传入
-	service, err := tightening_device.NewService()
+	s, err := tightening_device.NewService(config.GetConfig().TighteningDevice, []tightening_device.ITighteningProtocol{
+		openprotocol.NewService(config.GetConfig().OpenProtocol, nil, vendors.OpenProtocolVendors),
+	})
 	if err != nil {
 		return
 	}
-	fmt.Println("Op Serve Running.")
+	err = s.Open()
+	if err != nil {
+		return
+	}
+	fmt.Println("Op Client Running.")
 	go exit()
 	select {}
 }

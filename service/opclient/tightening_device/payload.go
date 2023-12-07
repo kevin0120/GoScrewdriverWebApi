@@ -1,16 +1,9 @@
 package tightening_device
 
 import (
-	"encoding/json"
 	"errors"
 	"time"
-
-	"github.com/masami10/rush/services/httpd"
-
-	"github.com/masami10/rush/services/storage"
 )
-
-type HMICommonResponse = httpd.HMICommonResponse
 
 const (
 	TIGHTENING_OPENPROTOCOL = "OpenProtocol"
@@ -219,55 +212,6 @@ func (r *TighteningResult) ValidateSet() error {
 	return nil
 }
 
-func (r *TighteningResult) ToDBResult() *storage.Results {
-	ll := len(r.StepResults)
-	psetDefines := make([]PSetDefine, ll)
-	for i := 0; i < ll; i++ {
-		pSetInfo := r.StepResults[i]
-		psetDefines[i] = pSetInfo.PSetDefine
-	}
-	strPsetDefine, _ := json.Marshal(psetDefines)
-	resultValues := make([]TighteningResult, ll)
-
-	for i := 0; i < ll; i++ {
-		pSetInfo := r.StepResults[i]
-		resultValues[i] = pSetInfo.TighteningResult
-
-	}
-	strResultValue, _ := json.Marshal(resultValues)
-	var stepResult string
-	if ss, err := json.Marshal(r.StepResults); err == nil {
-		stepResult = string(ss)
-	}
-
-	return &storage.Results{
-		Job:            r.Job,
-		ControllerName: r.ControllerName,
-		ErrCode:        r.ErrorCode,
-		ExInfo:         r.Vin,
-		ToolCounter:    r.TotalToolCounter,
-		HasUpload:      false,
-		Seq:            r.Seq,
-		WorkorderID:    r.WorkorderID,
-		Result:         r.MeasureResult,
-		ToolSN:         r.ToolSN,
-		TighteningUnit: r.TighteningUnit,
-		ControllerSN:   r.ControllerSN,
-		TighteningID:   r.TighteningID,
-		UpdateTime:     r.UpdateTime,
-		PSetDefine:     string(strPsetDefine),
-		ResultValue:    string(strResultValue),
-		Count:          r.BatchCount,
-		PSet:           r.PSet,
-		Batch:          r.Batch,
-		Spent:          r.MeasureTime,
-		UserID:         r.UserID,
-		NutNo:          r.NutNo,
-		ScannerCode:    r.ScannerCode,
-		StepResult:     stepResult,
-	}
-}
-
 type TighteningCurve struct {
 	// 工具序列号
 	ToolSN         string `json:"tool_sn"`
@@ -289,20 +233,6 @@ func (s *TighteningCurve) GenerateTimeCurveByCoef(coef float32) {
 
 func NewTighteningCurve() *TighteningCurve {
 	return &TighteningCurve{}
-}
-
-func (c *TighteningCurve) ToDBCurve() *storage.Curves {
-	curveContent, _ := json.Marshal(c.TighteningCurveContent)
-
-	return &storage.Curves{
-		HasUpload:      false,
-		UpdateTime:     c.UpdateTime,
-		CurveData:      string(curveContent),
-		ToolSN:         c.ToolSN,
-		TighteningUnit: c.TighteningUnit,
-		TighteningID:   c.TighteningID,
-		//CurveFile:  fmt.Sprintf("%s_%s.json", c.ToolSN, c.TighteningID),
-	}
 }
 
 type TighteningCurveContent struct {

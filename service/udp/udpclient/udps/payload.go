@@ -2,7 +2,6 @@ package udps
 
 import (
 	"encoding/binary"
-	"golang.org/x/text/encoding/simplifiedchinese"
 	"math"
 	"time"
 )
@@ -227,11 +226,11 @@ func Raw2Value(data []byte, dataType int) interface{} {
 		break
 	case StringUnicode:
 		r = ""
-		if len(data) >= 1 {
-			decoder := simplifiedchinese.GBK.NewDecoder()
-			decodedBuff, _ := decoder.Bytes(data)
-			r = string(decodedBuff[:len(decodedBuff)-1])
-		}
+		//if len(data) >= 1 {
+		//	decoder := simplifiedchinese.GBK.NewDecoder()
+		//	decodedBuff, _ := decoder.Bytes(data)
+		//	r = string(decodedBuff[:len(decodedBuff)-1])
+		//}
 		break
 	case ByteArray:
 		r = []byte("")
@@ -340,11 +339,11 @@ func GetRawData(val interface{}, dataType int) []byte {
 		break
 
 	case StringUnicode:
-		b, _ := val.(string)
-		c := b + "\x00"
-		encoder := simplifiedchinese.GBK.NewEncoder()
-		gbkBytes, _ := encoder.Bytes([]byte(c))
-		data = append(data, gbkBytes...)
+		//b, _ := val.(string)
+		//c := b + "\x00"
+		//encoder := simplifiedchinese.GBK.NewEncoder()
+		//gbkBytes, _ := encoder.Bytes([]byte(c))
+		//data = append(data, gbkBytes...)
 		break
 
 	case ByteArray:

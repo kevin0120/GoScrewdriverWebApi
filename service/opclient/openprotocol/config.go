@@ -1,8 +1,8 @@
 package openprotocol
 
 import (
-	"github.com/masami10/rush/toml"
-	"github.com/masami10/rush/typeDef"
+	"github.com/kevin0120/GoScrewdriverWebApi/utils/toml"
+	"github.com/kevin0120/GoScrewdriverWebApi/utils/typeDef"
 	"time"
 )
 
