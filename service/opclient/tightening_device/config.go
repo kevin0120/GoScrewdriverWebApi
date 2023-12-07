@@ -49,9 +49,9 @@ func NewConfig() Config {
 		Devices: []TighteningDeviceConfig{
 
 			{
-				Model:          ModelDesoutterCvi3,
+				Model:          ModelLeetxTCS2000,
 				Protocol:       "OpenProtocol",
-				Endpoint:       "tcp://192.168.5.232:4545",
+				Endpoint:       "tcp://192.168.20.145:9101",
 				SN:             "ControllerSn",
 				ControllerName: "ControllerName",
 				Tools: []ToolConfig{

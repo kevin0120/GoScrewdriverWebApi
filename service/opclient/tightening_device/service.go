@@ -15,6 +15,7 @@ const (
 	ModelDesoutterConnector   = "ModelDesoutterConnector"
 	ModelCraneIQWrench        = "ModelCraneIQWrench"
 	ModelLexenWrench          = "ModelLexenWrench"
+	ModelLeetxTCS2000         = "ModelLeetxTCS2000"
 )
 
 type Service struct {

@@ -19,19 +19,31 @@
     },
     "devices": [
       {
-        "model": "ModelDesoutterCvi3",
+        "model": "ModelLeetxTCS2000",
         "protocol": "OpenProtocol",
-        "endpoint": "tcp://192.168.5.232:4545",
+        "endpoint": "tcp://192.168.20.145:9101",
         "sn": "ControllerSn",
         "name": "ControllerName",
         "children": [
           {
             "sn": "ToolSn",
-            "channel": 2,
+            "channel": 1,
             "endpoint": "tcp://192.168.0.26:4545"
           }
         ]
       }
     ]
+  },
+  "openprotocol": {
+    "SkipJobs": [
+      250
+    ],
+    "DataIndex": 1,
+    "VinIndex": [
+      0,
+      1
+    ],
+    "GetToolInfoPeriod": "12h0m0s",
+    "DefaultMode": "job"
   }
 }

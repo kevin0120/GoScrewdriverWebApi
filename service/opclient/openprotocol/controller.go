@@ -19,14 +19,15 @@ type respPkg struct {
 type SubscribeBarcodeStatusType string
 
 type TighteningController struct {
-	instance IOpenProtocolController
+	instance   IOpenProtocolController
+	deviceConf *tightening_device.TighteningDeviceConfig
 }
 
 func (c *TighteningController) Protocol() string {
 	return tightening_device.TIGHTENING_OPENPROTOCOL
 }
 func (c *TighteningController) model() string {
-	return "c.deviceConf.Model"
+	return c.deviceConf.Model
 	//return c.deviceConf.Model
 }
 func (c *TighteningController) Model() string {
@@ -38,5 +39,5 @@ func (c *TighteningController) SetInstance(instance IOpenProtocolController) {
 }
 
 func (c *TighteningController) initController(deviceConfig *tightening_device.TighteningDeviceConfig, d Diagnostic, service *Service) {
-
+	c.deviceConf = deviceConfig
 }
