@@ -178,12 +178,12 @@ func (s *Service) startupControllers() {
 	s.mtxDevices.Lock()
 	defer s.mtxDevices.Unlock()
 
-	//for sn, c := range s.runningControllers {
-	//	err := c.Start()
-	//	if err != nil {
-	//		continue
-	//	}
-	//}
+	for _, c := range s.runningControllers {
+		err := c.Start()
+		if err != nil {
+			continue
+		}
+	}
 }
 
 func (s *Service) shutdownControllers() {

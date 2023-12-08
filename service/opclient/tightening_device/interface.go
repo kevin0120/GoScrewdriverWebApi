@@ -11,8 +11,10 @@ type ITighteningProtocol interface {
 
 type ITighteningController interface {
 	Model() string
+	Start() error
 }
 
 type ITighteningTool interface {
 	Mode() string
+	Start() error
 }

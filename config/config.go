@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/kevin0120/GoScrewdriverWebApi/service/diagnostic"
 	"github.com/kevin0120/GoScrewdriverWebApi/service/opclient/openprotocol"
 	"github.com/kevin0120/GoScrewdriverWebApi/service/opclient/tightening_device"
 	"io/fs"
@@ -29,6 +30,7 @@ type MyConfig struct {
 	Database         *Database                `json:"database"`
 	TighteningDevice tightening_device.Config `json:"tightening_device"`
 	OpenProtocol     openprotocol.Config      `json:"openprotocol"`
+	Logging          diagnostic.Config        `json:"logging"`
 }
 
 var Config *MyConfig
@@ -92,6 +94,7 @@ func getDefaultConfig() *MyConfig {
 			LocalPort:  50004},
 		TighteningDevice: tightening_device.NewConfig(),
 		OpenProtocol:     openprotocol.NewConfig(),
+		Logging:          diagnostic.NewConfig(),
 	}
 }
 
