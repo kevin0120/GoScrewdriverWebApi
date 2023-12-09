@@ -48,7 +48,7 @@
     "DefaultMode": "job"
   },
   "logging": {
-    "File": "STDERR",
+    "File": "./logs/%Y%m%d.log",
     "Level": "DEBUG",
     "MaxAge": "744h0m0s",
     "Rotate": "24h0m0s"
