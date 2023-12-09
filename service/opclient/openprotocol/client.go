@@ -1,11 +1,10 @@
 package openprotocol
 
 import (
-	"bufio"
-	"bytes"
 	"context"
 	"encoding/hex"
 	"fmt"
+	"github.com/cenkalti/backoff/v4"
 	"github.com/kevin0120/GoScrewdriverWebApi/service/opclient/tightening_device"
 	"github.com/kevin0120/GoScrewdriverWebApi/utils"
 	"github.com/kevin0120/GoScrewdriverWebApi/utils/socket_writer"
@@ -36,7 +35,7 @@ func newClientContext(endpoint string, diag Diagnostic, handler IClientHandler, 
 		tempPhaseResult: &PhaseResult{},
 		params:          params,
 	}
-
+	ctx.UpdateStatus(BaseDeviceStatusOffline)
 	ctx.sockClient = socket_writer.NewSocketWriter(endpoint, &ctx)
 	return &ctx
 }
@@ -212,7 +211,7 @@ func (ctx *clientContext) procHandle() {
 }
 
 func (c *clientContext) procAlive() {
-	ticker := time.NewTicker(time.Second)
+	ticker := time.NewTicker(100 * time.Millisecond)
 	defer ticker.Stop()
 	for {
 		select {
@@ -245,43 +244,24 @@ func (c *clientContext) Read(conn net.Conn) {
 		c.closinghandleRecv <- struct{}{}
 	}()
 
-	splitFunc := func(data []byte, atEOF bool) (advance int, token []byte, err error) {
-		s := byte(OpTerminal)
-		if atEOF && len(data) == 0 {
-			return 0, nil, nil
-		}
-		if i := bytes.IndexByte(data, s); i >= 0 {
-			// We have a full newline-terminated line.
-			return i + 1, data[0:i], nil
-		}
-		// If we're at EOF, we have a final, non-terminated line. Return it.
-		if atEOF {
-			return len(data), data, nil
-		}
-		// Request more data.
-		return 0, nil, nil
-	}
-
 	buf := make([]byte, BufferSize)
+	//var err error
 
-	newScanner := bufio.NewScanner(conn)
-	newScanner.Buffer(buf, BufferSize)
+	for {
+		//if err = conn.SetReadDeadline(time.Now().Add(c.params.KeepAlivePeriod * time.Duration(c.params.MaxKeepAliveCheck)).Add(1 * time.Second)); err != nil {
+		//	c.diag.Error("SetReadDeadline Failed ", err)
+		//	break
+		//}
+		n, err1 := conn.Read(buf)
 
-	newScanner.Split(splitFunc)
-
-	var err error
-
-	for newScanner.Scan() {
-		if err = conn.SetReadDeadline(time.Now().Add(c.params.KeepAlivePeriod * time.Duration(c.params.MaxKeepAliveCheck)).Add(1 * time.Second)); err != nil {
-			c.diag.Error("SetReadDeadline Failed ", err)
+		fmt.Println("接收到的原始数据为:", string(buf[:n]), "结束")
+		if err1 != nil {
 			break
 		}
-
-		b := newScanner.Bytes()
-
-		dst := make([]byte, len(b))
-		copy(dst, b)
+		dst := make([]byte, n-1)
+		copy(dst, buf[:n-1])
 		c.updateKeepAliveCount(0)
+
 		c.receiveBuf <- dst
 
 	}
@@ -290,6 +270,63 @@ func (c *clientContext) Read(conn net.Conn) {
 	c.clientHandler.HandleStatus(c.sn, BaseDeviceStatusOffline)
 	c.clientHandler.UpdateToolStatus(c.sn, BaseDeviceStatusOffline)
 }
+
+////
+//func (c *clientContext) Read(conn net.Conn) {
+//	defer func() {
+//		if err := conn.Close(); err != nil {
+//			c.diag.Error("Client Close Error ", err)
+//		}
+//
+//		c.closinghandleRecv <- struct{}{}
+//	}()
+//
+//	splitFunc := func(data []byte, atEOF bool) (advance int, token []byte, err error) {
+//		s := byte(OpTerminal)
+//		if atEOF && len(data) == 0 {
+//			return 0, nil, nil
+//		}
+//		if i := bytes.IndexByte(data, s); i >= 0 {
+//			// We have a full newline-terminated line.
+//			return i + 1, data[0:i], nil
+//		}
+//		// If we're at EOF, we have a final, non-terminated line. Return it.
+//		if atEOF {
+//			return len(data), data, nil
+//		}
+//		// Request more data.
+//		return 0, nil, nil
+//	}
+//
+//	buf := make([]byte, BufferSize)
+//
+//	newScanner := bufio.NewScanner(conn)
+//	newScanner.Buffer(buf, BufferSize)
+//
+//	newScanner.Split(splitFunc)
+//
+//	var err error
+//
+//	for newScanner.Scan() {
+//		if err = conn.SetReadDeadline(time.Now().Add(c.params.KeepAlivePeriod * time.Duration(c.params.MaxKeepAliveCheck)).Add(1 * time.Second)); err != nil {
+//			c.diag.Error("SetReadDeadline Failed ", err)
+//			break
+//		}
+//
+//		b := newScanner.Bytes()
+//
+//		dst := make([]byte, len(b))
+//		copy(dst, b)
+//		c.updateKeepAliveCount(0)
+//
+//		fmt.Println("hhhhhhhhhhhhhhhhhhh", string(dst))
+//		c.receiveBuf <- dst
+//	}
+//
+//	c.handleStatus(BaseDeviceStatusOffline)
+//	c.clientHandler.HandleStatus(c.sn, BaseDeviceStatusOffline)
+//	c.clientHandler.UpdateToolStatus(c.sn, BaseDeviceStatusOffline)
+//}
 
 func (c *clientContext) Status() string {
 	return c.status.Load().(string)
@@ -380,14 +417,16 @@ func (c *clientContext) connect() {
 	time.Sleep(100 * time.Millisecond)
 
 	operation := func() error {
+
 		err := c.startComm()
 		if err != nil {
 			return err
 		}
 		return nil
 	}
-
-	err := operation()
+	err := backoff.RetryNotify(operation, backoff.NewExponentialBackOff(), func(err error, duration time.Duration) {
+		c.diag.Debug(fmt.Sprintf("start Cmd send Failed: %s, retry after %v", err.Error(), duration))
+	})
 	if err != nil {
 		c.diag.Error(fmt.Sprintf("Start Comm Failed: %s", c.sn), err)
 	}

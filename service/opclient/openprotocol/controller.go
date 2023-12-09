@@ -3,8 +3,11 @@ package openprotocol
 import (
 	"errors"
 	"fmt"
+	"github.com/cenkalti/backoff/v4"
 	"github.com/kevin0120/GoScrewdriverWebApi/service/opclient/tightening_device"
 	"go.uber.org/atomic"
+	"reflect"
+	"strings"
 	"time"
 )
 
@@ -36,20 +39,21 @@ type SubscribeBarcodeStatusType string
 
 type TighteningController struct {
 	instance             IOpenProtocolController
-	deviceConf           *tightening_device.TighteningDeviceConfig
+	DeviceConf           *tightening_device.TighteningDeviceConfig
 	sockClients          map[string]*clientContext
 	ControllerSubscribes []ControllerSubscribe
 	isGlobalConn         bool
 	opened               atomic.Bool
 	status               *atomic.String
 	serialNumber         string
+	diag                 Diagnostic
 }
 
 func (s *TighteningController) Protocol() string {
 	return tightening_device.TIGHTENING_OPENPROTOCOL
 }
 func (s *TighteningController) model() string {
-	return s.deviceConf.Model
+	return s.DeviceConf.Model
 	//return c.deviceConf.Model
 }
 func (s *TighteningController) Model() string {
@@ -78,23 +82,23 @@ func (s *TighteningController) ResultSubscribe(sn string) error {
 		}
 	}()
 
-	//reply, err := c.getClient(sn).ProcessRequest(MID_0060_LAST_RESULT_SUBSCRIBE, false, "", "", "")
-	//if err != nil {
-	//	return err
-	//}
-	//
-	//tt := reflect.TypeOf(reply)
-	//ss := ""
-	//switch tt.Kind() { //nolint: exhaustive
-	//case reflect.String:
-	//	ss = reply.(string)
-	//default:
-	//	c.diag.Error("ResultSubscribe", errors.New("reply Type Is Not String"))
-	//}
-	//
-	//if ss != requestErrors["00"] {
-	//	return errors.New(fmt.Sprintf("MID: %s err: %s", MID_0060_LAST_RESULT_SUBSCRIBE, reply.(string)))
-	//}
+	reply, err := s.getClient(sn).ProcessRequest(MID_0060_LAST_RESULT_SUBSCRIBE, false, "", "", "")
+	if err != nil {
+		return err
+	}
+
+	tt := reflect.TypeOf(reply)
+	ss := ""
+	switch tt.Kind() { //nolint: exhaustive
+	case reflect.String:
+		ss = reply.(string)
+	default:
+		s.diag.Error("ResultSubscribe", errors.New("reply Type Is Not String"))
+	}
+
+	if ss != requestErrors["00"] {
+		return errors.New(fmt.Sprintf("MID: %s err: %s", MID_0060_LAST_RESULT_SUBSCRIBE, reply.(string)))
+	}
 
 	return nil
 }
@@ -110,11 +114,40 @@ func (s *TighteningController) InitSubscribeInfos() {
 	}
 }
 
+func (c *TighteningController) processSubscribeControllerInfo(sn string) {
+	for _, subscribe := range c.ControllerSubscribes {
+		// 方法是阻塞的方法，因此要单独跑一个协程，如果订阅成功dead，未成功一直订阅
+		go func(sub func(sn string) error) {
+			operation := func() error {
+				err := sub(sn)
+				if err != nil {
+					// mid不支持或者已经存在则取消订阅
+					if strings.Contains(err.Error(), "Not Support") || strings.Contains(err.Error(), "already exists") {
+						return nil
+					} else if strings.Contains(err.Error(), "Unknown MID") || strings.Contains(err.Error(), "revision unsupported") {
+						return nil
+					} else {
+						return err
+					}
+				}
+				return nil
+			}
+			err := backoff.RetryNotify(operation, backoff.NewExponentialBackOff(), func(err error, duration time.Duration) {
+				c.diag.Debug(fmt.Sprintf("SeqNumber: %s OpenProtocol SubscribeControllerInfo Failed: %s, retry after %v", sn, err.Error(), duration))
+			})
+			if err != nil {
+				c.diag.Error("RetryNotify subscribe error", err)
+			}
+		}(subscribe)
+	}
+}
+
 func (s *TighteningController) initController(deviceConfig *tightening_device.TighteningDeviceConfig, d Diagnostic, service *Service) {
-	s.deviceConf = deviceConfig
+	s.DeviceConf = deviceConfig
 	s.status = atomic.NewString(BaseDeviceStatusOffline)
 	s.sockClients = map[string]*clientContext{}
 	s.getInstance().InitSubscribeInfos()
+	s.diag = d
 	s.initClients(deviceConfig, d)
 }
 
@@ -175,6 +208,30 @@ func (s *TighteningController) SerialNumber() string {
 func (s *TighteningController) SetSerialNumber(serialNumber string) {
 	s.serialNumber = serialNumber
 }
+func (c *TighteningController) getClient(sn string) *clientContext {
+	if c.isGlobalConn {
+		return c.getDefaultTransportClient()
+	}
+
+	return c.getTransportClientBySymbol(sn)
+}
+func (c *TighteningController) getDefaultTransportClient() *clientContext {
+
+	for _, sw := range c.sockClients {
+		return sw
+	}
+	return nil
+}
+func (c *TighteningController) getTransportClientBySymbol(symbol string) *clientContext {
+
+	if sw, ok := c.sockClients[symbol]; !ok {
+		//err := errors.Errorf("Can Not Found TransportService For %s", symbol)
+		//c.diag.Error("getTransportClientBySymbol", err)
+		return nil
+	} else {
+		return sw
+	}
+}
 
 func (s *TighteningController) HandleStatus(sn string, status string) {
 	if status == s.Status() {
@@ -183,7 +240,7 @@ func (s *TighteningController) HandleStatus(sn string, status string) {
 	s.UpdateStatus(status)
 }
 func (s *TighteningController) handleMsg(pkg *handlerPkg, context *clientContext) error {
-
+	s.diag.Debug(fmt.Sprintf("OpenProtocol Recv %s: %s%s\n", pkg.SN, pkg.Header.Serialize(), pkg.Body))
 	handler, err := s.getInstance().GetMidHandler(pkg.Header.MID)
 	if err != nil {
 		return err

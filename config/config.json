@@ -22,13 +22,14 @@
         "model": "ModelLeetxTCS2000",
         "protocol": "OpenProtocol",
         "endpoint": "tcp://192.168.20.145:9101",
+        "keepalive": "3s",
         "sn": "ControllerSn",
         "name": "ControllerName",
         "children": [
           {
             "sn": "ToolSn",
             "channel": 1,
-            "endpoint": "tcp://192.168.0.26:4545"
+            "endpoint": ""
           }
         ]
       }
@@ -45,5 +46,11 @@
     ],
     "GetToolInfoPeriod": "12h0m0s",
     "DefaultMode": "job"
+  },
+  "logging": {
+    "File": "STDERR",
+    "Level": "DEBUG",
+    "MaxAge": "744h0m0s",
+    "Rotate": "24h0m0s"
   }
 }

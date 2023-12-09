@@ -1,6 +1,7 @@
 package openprotocol
 
 import (
+	"fmt"
 	"github.com/kevin0120/GoScrewdriverWebApi/utils"
 )
 
@@ -17,6 +18,20 @@ func HandleMid9999Alive(c *TighteningController, pkg *handlerPkg) error {
 }
 
 func HandleMid0002StartAck(c *TighteningController, pkg *handlerPkg) error {
+	client := c.getClient(pkg.SN)
+	resp := &respPkg{
+		Seq:  pkg.Seq,
+		Body: requestErrors["00"],
+	}
+	if client.IsNeedResponse() {
+		client.responseChannel <- resp
+	}
+
+	go c.processSubscribeControllerInfo(pkg.SN)
+	if needOldTighteningResult {
+		c.diag.Info("Do Request Old Tightening Result!!!")
+		//c.solveOldResult(pkg.SN)
+	}
 
 	return nil
 }
@@ -76,12 +91,32 @@ func HandleMid0033JobDetailReply(c *TighteningController, pkg *handlerPkg) error
 
 // 请求错误
 func HandleMid0004CmdErr(c *TighteningController, pkg *handlerPkg) error {
+	client := c.getClient(pkg.SN)
+	errCode := pkg.Body[4:6]
+	resp := &respPkg{
+		Seq:  pkg.Seq,
+		Body: fmt.Sprintf("Error Code: %s Is Not Defined!", errCode),
+	}
+	if _, ok := requestErrors[errCode]; ok {
+		resp.Body = requestErrors[errCode]
+	}
+	if client.IsNeedResponse() {
+		client.responseChannel <- resp
+	}
 
 	return nil
 }
 
 // 请求成功
 func HandleMid0005CmdOk(c *TighteningController, pkg *handlerPkg) error {
+	client := c.getClient(pkg.SN)
+	resp := &respPkg{
+		Seq:  pkg.Seq,
+		Body: requestErrors["00"],
+	}
+	if client.IsNeedResponse() {
+		client.responseChannel <- resp
+	}
 
 	return nil
 }

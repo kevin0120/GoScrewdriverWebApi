@@ -21,8 +21,8 @@ func (c *TCS2000Controller) GetVendorModel() map[string]interface{} {
 		openprotocol.MID_0001_START:                 "001",
 		openprotocol.MID_0018_PSET:                  "001",
 		openprotocol.MID_0014_PSET_SUBSCRIBE:        "001",
-		openprotocol.MID_0060_LAST_RESULT_SUBSCRIBE: "006",
-		openprotocol.MID_0062_LAST_RESULT_ACK:       "006",
+		openprotocol.MID_0060_LAST_RESULT_SUBSCRIBE: "001",
+		openprotocol.MID_0062_LAST_RESULT_ACK:       "001",
 		openprotocol.MID_0064_OLD_SUBSCRIBE:         "006",
 		openprotocol.MID_0012_PSET_DETAIL_REQUEST:   "002",
 		openprotocol.MID_0010_PSET_LIST_REQUEST:     "009",
@@ -43,6 +43,6 @@ func (c *TCS2000Controller) OpenProtocolParams() *openprotocol.OpenProtocolParam
 	return &openprotocol.OpenProtocolParams{
 		MaxKeepAliveCheck: 3,
 		MaxReplyTime:      5 * time.Second,
-		KeepAlivePeriod:   5 * time.Second,
+		KeepAlivePeriod:   time.Duration(c.DeviceConf.KeepAlive),
 	}
 }

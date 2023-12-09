@@ -1,5 +1,10 @@
 package tightening_device
 
+import (
+	"github.com/kevin0120/GoScrewdriverWebApi/utils/toml"
+	"time"
+)
+
 type TighteningDeviceConfig struct {
 	// 控制器型号
 	Model string `yaml:"model" json:"model"`
@@ -9,7 +14,8 @@ type TighteningDeviceConfig struct {
 
 	// 连接地址(如果在控制器上配了连接地址，则下属所有工具共用此地址进行通信)
 	Endpoint string `yaml:"endpoint" json:"endpoint"`
-
+	// 连接地址(如果在控制器上配了连接地址，则下属所有工具共用此地址进行通信)
+	KeepAlive toml.Duration `yaml:"keepalive" json:"keepalive"`
 	// 控制器序列号
 	SN string `yaml:"sn" json:"sn"`
 
@@ -53,12 +59,12 @@ func NewConfig() Config {
 				Protocol:       "OpenProtocol",
 				Endpoint:       "tcp://192.168.20.145:9101",
 				SN:             "ControllerSn",
+				KeepAlive:      toml.Duration(time.Second * 3),
 				ControllerName: "ControllerName",
 				Tools: []ToolConfig{
 					{
-						SN:       "ToolSn",
-						Endpoint: "tcp://192.168.0.26:4545",
-						Channel:  1,
+						SN:      "ToolSn",
+						Channel: 1,
 					},
 				},
 			},
