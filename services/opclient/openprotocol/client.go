@@ -11,7 +11,6 @@ import (
 	"github.com/kevin0120/GoScrewdriverWebApi/utils"
 	"github.com/kevin0120/GoScrewdriverWebApi/utils/socket_writer"
 	"github.com/pkg/errors"
-	"github.com/reactivex/rxgo/v2"
 	"go.uber.org/atomic"
 	"net"
 	"time"
@@ -59,7 +58,6 @@ type clientContext struct {
 	keepaliveDeadLine atomic.Value
 	sendBuffer        chan []byte
 	handlerBuf        chan handlerPkg
-	vinSubscribeBuf   chan rxgo.Item
 	needResponse      *atomic.Bool
 	responseChannel   chan *respPkg
 	tempResultCurve   *tightening_device.TighteningCurve
@@ -320,7 +318,7 @@ func (c *clientContext) Read(conn net.Conn) {
 		dst := make([]byte, len(b))
 		copy(dst, b)
 		c.updateKeepAliveCount(0)
-		fmt.Println("接收到的原始数据为:", string(dst), "结束")
+		fmt.Println(fmt.Sprintf("接收到的原始数据为: %s结束", dst))
 		c.receiveBuf <- dst
 	}
 

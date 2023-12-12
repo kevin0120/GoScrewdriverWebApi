@@ -1,4 +1,8 @@
 {
+  "hostname": "localhost",
+  "data_dir": ".rush",
+  "serial_no": "779e0b6e-e12a-4067-b9e4-065409d9fe36",
+  "doc_path": "doc",
   "op_port": 4545,
   "udp_client": {
     "remote_host": "211.254.254.250",
@@ -48,9 +52,30 @@
     "DefaultMode": "job"
   },
   "logging": {
-    "File": "./logs/%Y%m%d.log",
+    "File": "STDERR",
     "Level": "DEBUG",
     "MaxAge": "744h0m0s",
     "Rotate": "24h0m0s"
+  },
+  "httpd": {
+    "bind-address": ":8080",
+    "log-enabled": true,
+    "write-tracing": false,
+    "shutdown-timeout": "10s",
+    "cors": {
+      "allowed-origins": [
+        "*"
+      ],
+      "allow-credentials": true,
+      "allowed-methods": [
+        "GET",
+        "HEAD",
+        "POST",
+        "PUT",
+        "PATCH",
+        "OPTIONS"
+      ]
+    },
+    "access_log": false
   }
 }

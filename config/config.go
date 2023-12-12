@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kevin0120/GoScrewdriverWebApi/services/diagnostic"
+	"github.com/kevin0120/GoScrewdriverWebApi/services/http/httpd"
 	"github.com/kevin0120/GoScrewdriverWebApi/services/opclient/openprotocol"
 	"github.com/kevin0120/GoScrewdriverWebApi/services/opclient/tightening_device"
+	"github.com/kevin0120/GoScrewdriverWebApi/utils"
 	"io/fs"
 	"io/ioutil"
 	"os"
@@ -24,32 +26,39 @@ type UdpClient struct {
 	RemotePort int    `json:"remote_port"`
 	LocalPort  int    `json:"local_port"`
 }
-type MyConfig struct {
+type Config struct {
+	Hostname string `yaml:"hostname" json:"hostname"`
+	DataDir  string `yaml:"data_dir" json:"data_dir"`
+	SN       string `yaml:"serial_no" json:"serial_no"`
+	Path     string `yaml:"-" json:"-"`
+	DocPath  string `yaml:"doc_path" json:"doc_path"`
+
 	OpPort           int                      `json:"op_port"`
 	UdpClient        *UdpClient               `json:"udp_client"`
 	Database         *Database                `json:"database"`
 	TighteningDevice tightening_device.Config `json:"tightening_device"`
 	OpenProtocol     openprotocol.Config      `json:"openprotocol"`
 	Logging          diagnostic.Config        `json:"logging"`
+	HTTP             httpd.Config             `json:"httpd"`
 }
 
-var Config *MyConfig
+var MyConfig *Config
 
 func init() {
 	// 生成默认配置
-	Config = getDefaultConfig()
+	MyConfig = getDefaultConfig()
 	// 读取配置文件并覆盖默认配置
 	exePath, err := os.Getwd()
 	if err != nil {
 		fmt.Println("无法获取可执行文件的路径:", err)
 	}
-	err = readConfigFile(exePath+"/config/config.json", Config)
+	err = readConfigFile(exePath+"/config/config.json", MyConfig)
 	if err != nil {
 		fmt.Println("Failed to read config file:", err)
 	}
 }
 
-func readConfigFile(filename string, config *MyConfig) error {
+func readConfigFile(filename string, config *Config) error {
 	file, err := os.Open(filename)
 	if err != nil {
 		// 配置文件不存在，直接返回
@@ -81,9 +90,14 @@ func readConfigFile(filename string, config *MyConfig) error {
 	return nil
 }
 
-func getDefaultConfig() *MyConfig {
+func getDefaultConfig() *Config {
 	// 生成默认配置的逻辑
-	return &MyConfig{
+	return &Config{
+		Hostname: "localhost",
+		SN:       utils.GenerateID(),
+		DocPath:  filepath.Join("./", "doc"),
+		DataDir:  filepath.Join("./", ".rush"),
+
 		OpPort: 4545,
 		Database: &Database{Host: "192.168.10.122",
 			Port: 8082, Username: "ROOT",
@@ -95,9 +109,10 @@ func getDefaultConfig() *MyConfig {
 		TighteningDevice: tightening_device.NewConfig(),
 		OpenProtocol:     openprotocol.NewConfig(),
 		Logging:          diagnostic.NewConfig(),
+		HTTP:             httpd.NewConfig(),
 	}
 }
 
-func GetConfig() *MyConfig {
-	return Config
+func GetConfig() *Config {
+	return MyConfig
 }

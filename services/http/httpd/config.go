@@ -15,18 +15,18 @@ const (
 )
 
 type CorsConfig struct {
-	AllowedOrigins   []string `yaml:"allowed-origins"`
-	AllowCredentials bool     `yaml:"allow-credentials"`
-	AllowedMethods   []string `yaml:"allowed-methods"`
+	AllowedOrigins   []string `yaml:"allowed-origins" json:"allowed-origins"`
+	AllowCredentials bool     `yaml:"allow-credentials" json:"allow-credentials"`
+	AllowedMethods   []string `yaml:"allowed-methods" json:"allowed-methods"`
 }
 
 type Config struct {
-	BindAddress     string        `yaml:"bind-address"`
-	LogEnabled      bool          `yaml:"log-enabled"`
-	WriteTracing    bool          `yaml:"write-tracing"`
-	ShutdownTimeout toml.Duration `yaml:"shutdown-timeout"`
-	Cors            CorsConfig    `yaml:"cors"`
-	AccessLog       bool          `yaml:"access_log"`
+	BindAddress     string        `yaml:"bind-address"  json:"bind-address"`
+	LogEnabled      bool          `yaml:"log-enabled" json:"log-enabled"`
+	WriteTracing    bool          `yaml:"write-tracing" json:"write-tracing"`
+	ShutdownTimeout toml.Duration `yaml:"shutdown-timeout" json:"shutdown-timeout"`
+	Cors            CorsConfig    `yaml:"cors" json:"cors"`
+	AccessLog       bool          `yaml:"access_log" json:"access_log"`
 }
 
 func NewConfig() Config {
