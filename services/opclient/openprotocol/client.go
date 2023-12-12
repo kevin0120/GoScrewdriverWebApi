@@ -318,7 +318,7 @@ func (c *clientContext) Read(conn net.Conn) {
 		dst := make([]byte, len(b))
 		copy(dst, b)
 		c.updateKeepAliveCount(0)
-		fmt.Println(fmt.Sprintf("接收到的原始数据为: %s结束", dst))
+		//fmt.Println(fmt.Sprintf("接收到的原始数据为: %s结束", dst))
 		c.receiveBuf <- dst
 	}
 
