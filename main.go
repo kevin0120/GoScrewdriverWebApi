@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/kevin0120/GoScrewdriverWebApi/service/opserver"
-	"github.com/kevin0120/GoScrewdriverWebApi/service/udp/udpclient"
+	"github.com/kevin0120/GoScrewdriverWebApi/services/opserver"
+	"github.com/kevin0120/GoScrewdriverWebApi/services/udp/udpclient"
 	"os"
 	"os/signal"
 	"strconv"

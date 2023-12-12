@@ -3,9 +3,9 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/kevin0120/GoScrewdriverWebApi/service/diagnostic"
-	"github.com/kevin0120/GoScrewdriverWebApi/service/opclient/openprotocol"
-	"github.com/kevin0120/GoScrewdriverWebApi/service/opclient/tightening_device"
+	"github.com/kevin0120/GoScrewdriverWebApi/services/diagnostic"
+	"github.com/kevin0120/GoScrewdriverWebApi/services/opclient/openprotocol"
+	"github.com/kevin0120/GoScrewdriverWebApi/services/opclient/tightening_device"
 	"io/fs"
 	"io/ioutil"
 	"os"

@@ -219,7 +219,7 @@ func (sl *SocketListener) Gather() error {
 func (sl *SocketListener) Start() error {
 	spl := strings.SplitN(sl.ServiceAddress, "://", 2)
 	if len(spl) != 2 {
-		return fmt.Errorf("invalid service address: %s", sl.ServiceAddress)
+		return fmt.Errorf("invalid services address: %s", sl.ServiceAddress)
 	}
 
 	if spl[0] == "unix" || spl[0] == "unixpacket" || spl[0] == "unixgram" {
