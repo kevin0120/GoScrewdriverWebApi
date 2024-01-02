@@ -1,12 +1,14 @@
 package httpd
 
 import (
+	stdContext "context"
 	"fmt"
 	"github.com/kataras/iris/v12"
 	"github.com/kevin0120/GoScrewdriverWebApi/services/diagnostic"
 	"github.com/rs/cors"
 	"log"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -73,9 +75,7 @@ func NewService(doc string, c Config, hostname string, disc *diagnostic.Service)
 		Pattern:     "/doc",
 		HandlerFunc: s.methods.getDoc,
 	}
-	if err := s.AddNewHttpHandler(r); err != nil {
-		return nil, err
-	}
+	s.Handler[0].AddRoute(r)
 
 	return s, nil
 }
@@ -110,4 +110,87 @@ func (s *Service) addNewHandler(version string, c Config, disc *diagnostic.Servi
 	s.HandlerByNames[version] = i
 
 	return nil
+}
+
+func (s *Service) manage() {
+	//println("start mamager")
+	var stopDone chan struct{}
+	select {
+	case stopDone = <-s.stop:
+		// if we're already all empty, we're already done
+		timeout := s.shutdownTimeout
+		ctx, cancel := stdContext.WithTimeout(stdContext.Background(), timeout)
+		defer cancel()
+		s.server.Shutdown(ctx)
+		close(stopDone)
+		return
+	}
+
+}
+
+// Close closes the underlying listener.
+func (s *Service) Close() error {
+	//defer s.DiagService.StoppedService()
+	// If server is not set we were never started
+	if s.server == nil {
+		return nil
+	}
+	// Signal to manage loop we are stopping
+	stopping := make(chan struct{})
+	s.stop <- stopping
+
+	<-stopping
+	s.server = nil
+	return nil
+}
+
+func (s *Service) serve() {
+	err := s.server.Run(s.Addr(), iris.WithoutInterruptHandler)
+	// The listener was closed so exit
+	// See https://github.com/golang/go/issues/4373
+	if !strings.Contains(err.Error(), "closed") {
+		s.err <- fmt.Errorf("listener failed: addr=%s, err=%s", s.Addr(), err)
+	} else {
+		s.err <- nil
+	}
+}
+
+// Open starts the service
+func (s *Service) Open() error {
+	//s.DiagService.StartingService()
+
+	s.stop = make(chan chan struct{})
+
+	go s.manage()
+	go s.serve()
+	return nil
+}
+
+func (s *Service) Addr() iris.Runner {
+	return iris.Addr(s.addr)
+}
+
+func (s *Service) Err() <-chan error {
+	return s.err
+}
+
+func (s *Service) URL() string {
+
+	return "http://" + s.server.ConfigurationReadOnly().GetVHost()
+}
+
+// ExternalURL URL that should resolve externally to the server HTTP endpoint.
+// It is possible that the URL does not resolve correctly  if the hostname config setting is incorrect.
+func (s *Service) ExternalURL() string {
+	return s.externalURL
+}
+
+func (s *Service) GetHandlerByName(version string) (*Handler, error) {
+	i, ok := s.HandlerByNames[version]
+	if !ok {
+		// Should be unreachable code
+		return nil, fmt.Errorf("cannot get handler By %s", version)
+	}
+
+	return s.Handler[i], nil
 }

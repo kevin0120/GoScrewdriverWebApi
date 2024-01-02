@@ -63,7 +63,7 @@ func NewHandler(loggingEnabled bool, writeTrace bool) *Handler {
 	return h
 }
 
-func (h *Handler) addRoute(r Route) error {
+func (h *Handler) AddRoute(r Route) error {
 	if len(r.Pattern) > 0 && r.Pattern[0] != '/' {
 		return fmt.Errorf("route patterns must begin with a '/' %s", r.Pattern)
 	}

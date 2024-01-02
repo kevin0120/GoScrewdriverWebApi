@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	_ "github.com/kevin0120/GoScrewdriverWebApi/services/http/httpd"
 	"github.com/kevin0120/GoScrewdriverWebApi/services/opserver"
 	"github.com/kevin0120/GoScrewdriverWebApi/services/udp/udpclient"
 	"os"
@@ -44,5 +45,9 @@ func main() {
 	go opserver.StartOpServe(addr, client)
 	fmt.Println("Op Serve Running.")
 	go exit()
+
+	go func() {
+		//httpd.NewService()
+	}()
 	select {}
 }
