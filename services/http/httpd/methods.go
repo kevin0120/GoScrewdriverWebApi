@@ -28,7 +28,6 @@ func (m *Methods) getDoc(ctx iris.Context) {
 	ctx.Write(f) //nolint
 }
 
-//
 func NewCommonResponseBody(resp *HMICommonResponse, ctx iris.Context) error {
 	ctx.StatusCode(resp.StatusCode)
 	if err := ctx.JSON(resp); err != nil {

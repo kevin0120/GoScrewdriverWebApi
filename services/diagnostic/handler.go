@@ -167,6 +167,14 @@ type HTTPDHandler struct {
 	l Logger
 }
 
+func (h *HTTPDHandler) Debug(msg string) {
+	h.l.Debug(msg)
+}
+
+func (h *HTTPDHandler) Info(msg string) {
+	h.l.Info(msg)
+}
+
 func (h *HTTPDHandler) NewHTTPServerErrorLogger() *log.Logger {
 	s := &StaticLevelHandler{
 		l:     h.l.With(String("services", "httpd_server_errors")),

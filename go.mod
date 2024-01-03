@@ -1,6 +1,6 @@
 module github.com/kevin0120/GoScrewdriverWebApi
 
-go 1.21.5
+go 1.18
 
 require (
 	github.com/cenkalti/backoff/v4 v4.2.1
@@ -11,9 +11,6 @@ require (
 	github.com/satori/go.uuid v1.2.0
 	go.uber.org/atomic v1.11.0
 	gopkg.in/resty.v1 v1.12.0
-)
-
-require (
 	github.com/BurntSushi/toml v1.3.2 // indirect
 	github.com/CloudyKit/fastprinter v0.0.0-20200109182630-33d98a066a53 // indirect
 	github.com/CloudyKit/jet/v6 v6.2.0 // indirect

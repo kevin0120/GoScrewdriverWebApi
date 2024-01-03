@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/kevin0120/GoScrewdriverWebApi/config"
+	"github.com/kevin0120/GoScrewdriverWebApi/services/diagnostic"
+	"github.com/kevin0120/GoScrewdriverWebApi/services/http/httpd"
 	_ "github.com/kevin0120/GoScrewdriverWebApi/services/http/httpd"
 	"github.com/kevin0120/GoScrewdriverWebApi/services/opserver"
 	"github.com/kevin0120/GoScrewdriverWebApi/services/udp/udpclient"
@@ -25,6 +28,12 @@ func exit() {
 func main() {
 	// 获取命令行输入的参数
 	// 检查是否至少有一个参数传入
+	diagService := diagnostic.NewService(config.GetConfig().Logging, os.Stdout, os.Stderr)
+
+	if err := diagService.Open(); err != nil {
+		return
+	}
+	http := diagService.NewHTTPDHandler()
 	port := 4545
 	if len(os.Args) == 2 {
 		port, _ = strconv.Atoi(os.Args[1])
@@ -47,7 +56,14 @@ func main() {
 	go exit()
 
 	go func() {
-		//httpd.NewService()
+		srv, err := httpd.NewService(config.GetConfig().DocPath, config.GetConfig().HTTP, config.GetConfig().Hostname, http, diagService)
+		if err != nil {
+			panic("!!!Panic: Can Not Open Http Service!!!")
+		}
+		err = srv.Open()
+		if err != nil {
+			return
+		}
 	}()
 	select {}
 }

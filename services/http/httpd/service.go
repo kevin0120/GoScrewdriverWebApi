@@ -17,6 +17,12 @@ const (
 	BasePath = "/rush/v1"
 )
 
+type Diagnostic interface {
+	Error(msg string, err error)
+	Info(msg string)
+	Debug(msg string)
+}
+
 type Service struct {
 	addr string
 	err  chan error
@@ -33,8 +39,8 @@ type Service struct {
 
 	HandlerByNames map[string]int
 
-	cors CorsConfig
-
+	cors   CorsConfig
+	diag   Diagnostic
 	opened bool
 
 	DiagService interface {
@@ -43,7 +49,7 @@ type Service struct {
 	httpServerErrorLogger *log.Logger
 }
 
-func NewService(doc string, c Config, hostname string, disc *diagnostic.Service) (*Service, error) {
+func NewService(doc string, c Config, hostname string, d Diagnostic, disc *diagnostic.Service) (*Service, error) {
 
 	port, _ := c.Port()
 	u := url.URL{
@@ -61,6 +67,7 @@ func NewService(doc string, c Config, hostname string, disc *diagnostic.Service)
 		shutdownTimeout: time.Duration(c.ShutdownTimeout),
 		DiagService:     disc,
 		opened:          false,
+		diag:            d,
 	}
 
 	s.methods = newHttpMethods(s)
@@ -75,7 +82,10 @@ func NewService(doc string, c Config, hostname string, disc *diagnostic.Service)
 		Pattern:     "/doc",
 		HandlerFunc: s.methods.getDoc,
 	}
-	s.Handler[0].AddRoute(r)
+	err := s.Handler[0].AddRoute(r)
+	if err != nil {
+		return nil, err
+	}
 
 	return s, nil
 }
@@ -145,6 +155,8 @@ func (s *Service) Close() error {
 }
 
 func (s *Service) serve() {
+	s.diag.Info(s.URL())
+	s.diag.Info(s.ExternalURL())
 	err := s.server.Run(s.Addr(), iris.WithoutInterruptHandler)
 	// The listener was closed so exit
 	// See https://github.com/golang/go/issues/4373
