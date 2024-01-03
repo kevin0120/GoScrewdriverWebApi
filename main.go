@@ -5,7 +5,6 @@ import (
 	"github.com/kevin0120/GoScrewdriverWebApi/config"
 	"github.com/kevin0120/GoScrewdriverWebApi/services/diagnostic"
 	"github.com/kevin0120/GoScrewdriverWebApi/services/http/httpd"
-	_ "github.com/kevin0120/GoScrewdriverWebApi/services/http/httpd"
 	"github.com/kevin0120/GoScrewdriverWebApi/services/opserver"
 	"github.com/kevin0120/GoScrewdriverWebApi/services/udp/udpclient"
 	"os"
@@ -34,20 +33,27 @@ func main() {
 		return
 	}
 	http := diagService.NewHTTPDHandler()
+	srv, err := httpd.NewService(config.GetConfig().DocPath, config.GetConfig().HTTP, config.GetConfig().Hostname, http, diagService)
+	if err != nil {
+		panic("!!!Panic: Can Not Open Http Service!!!")
+	}
+	err = srv.Open()
+	if err != nil {
+		return
+	}
+
 	port := 4545
 	if len(os.Args) == 2 {
 		port, _ = strconv.Atoi(os.Args[1])
 	}
 	client := udpclient.NewClient(3000)
 
+	go client.ConnectToServer("211.254.254.250", 8080, 0)
 	go func() {
-		go client.ConnectToServer("211.254.254.250", 8080, 0)
-		go func() {
-			err := client.ReadMultiSdoCircle([]string{"0x300803", "0x300811", "0x300814", "0x100006", "0x100007", "0x30010A", "0x300807", "0x300808", "0x300831"})
-			if err != nil {
-				return
-			}
-		}()
+		err := client.ReadMultiSdoCircle([]string{"0x300803", "0x300811", "0x300814", "0x100006", "0x100007", "0x30010A", "0x300807", "0x300808", "0x300831"})
+		if err != nil {
+			return
+		}
 	}()
 	//开启op服务
 	addr := fmt.Sprintf("0.0.0.0:%d", port)
@@ -55,15 +61,5 @@ func main() {
 	fmt.Println("Op Serve Running.")
 	go exit()
 
-	go func() {
-		srv, err := httpd.NewService(config.GetConfig().DocPath, config.GetConfig().HTTP, config.GetConfig().Hostname, http, diagService)
-		if err != nil {
-			panic("!!!Panic: Can Not Open Http Service!!!")
-		}
-		err = srv.Open()
-		if err != nil {
-			return
-		}
-	}()
 	select {}
 }

@@ -68,6 +68,7 @@ func (c *UdpClient) Close() {
 
 func (c *UdpClient) ConnectToServer(sIpAddr string, sdoPort int, topicPort int) {
 	// 解析服务器地址
+	c.HandleHttpRequest()
 	udpAddr := &net.UDPAddr{
 		IP:   net.ParseIP(sIpAddr),
 		Port: sdoPort,
