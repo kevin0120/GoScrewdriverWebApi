@@ -1,16 +1,21 @@
 package udps
 
 type Sdo struct {
-	sdoKey   string
-	dataType int
-	sdoValue interface{}
+	SdoKey   string
+	DataType int
+	SdoValue []byte
 }
 
-func SdoGenerator(sdoKey string, dataType int, sdoValue interface{}) *Sdo {
+func (s *Sdo) Bytes() []byte {
+	data := append(append(append(GetRawData(s.SdoKey, String), GetRawData(s.DataType, U8)...), GetRawData(len(s.SdoValue), U32)...), s.SdoValue...)
+	return data
+}
+
+func SdoGenerator(sdoKey string, dataType int, sdoValue []byte) *Sdo {
 	return &Sdo{
-		sdoKey:   sdoKey,
-		dataType: dataType,
-		sdoValue: sdoValue,
+		SdoKey:   sdoKey,
+		DataType: dataType,
+		SdoValue: sdoValue,
 	}
 }
 
@@ -36,7 +41,7 @@ func SdoPack(data []byte, opType uint16, rid uint32) []byte {
 		r = bytesPacker(data, SUB_ITEM, rid)
 		break
 	case SUB_TOPIC:
-		r = bytesPacker([]byte(""), QSdoDefines, rid)
+		r = bytesPacker([]byte("\x00"), QSdoDefines, rid)
 		break
 	case ReadJson:
 		buff := GetRawData(len(data), U32)

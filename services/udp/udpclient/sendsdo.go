@@ -1,6 +1,7 @@
 package udpclient
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/kevin0120/GoScrewdriverWebApi/services/udp/udpclient/udps"
 	"time"
@@ -86,24 +87,82 @@ func (c *UdpClient) ReadSingleSdo(sdoKey string) (error, *udps.Sdo) {
 }
 
 func (c *UdpClient) ReadMultiSdo(sdoKeys []string) (error, map[string]udps.Sdo) {
+	var bs []byte
+	for _, item := range sdoKeys {
+		bs = append(bs, udps.GetRawData(item, udps.String)...)
+	}
+	buff := c.request(udps.SdoPack(udps.GetRawData(bs, udps.String), udps.QSdo, c.requestId()))
+	fmt.Println(buff)
 	return nil, nil
 }
 
 func (c *UdpClient) ReadSdoDefines() (error, map[string]udps.Sdo) {
+	buff := c.request(udps.SdoPack(nil, udps.QSdoDefines, c.requestId()))
+	fmt.Println(buff)
 	return nil, nil
 }
 
 func (c *UdpClient) ReadSubTopics() (error, map[string]udps.Sdo) {
+	buff := c.request(udps.SdoPack(nil, udps.SUB_TOPIC, c.requestId()))
+	fmt.Println(buff)
 	return nil, nil
 }
 
 func (c *UdpClient) ReadJson() (error, string) {
+	obj := map[string]interface{}{
+		"mode": "r",
+		"node": "field_1",
+	}
+	data, _ := json.Marshal(obj)
+	buff := c.request(udps.SdoPack(udps.GetRawData(data, udps.String), udps.ReadJson, c.requestId()))
+	fmt.Println(buff)
 	return nil, ""
 }
 func (c *UdpClient) WriteSingleSdo(sdo *udps.Sdo) error {
+	data := sdo.Bytes()
+	buff := c.request(udps.SdoPack(data, udps.MSdo, c.requestId()))
+	fmt.Println(buff)
 	return nil
 }
 
 func (c *UdpClient) WriteMultiSdo(sdoList []*udps.Sdo) (error, map[string]int) {
+	var data []byte
+	for _, sdo := range sdoList {
+		data = append(data, sdo.Bytes()...)
+	}
+	buff := c.request(udps.SdoPack(data, udps.MSdo, c.requestId()))
+	fmt.Println(buff)
 	return nil, nil
+}
+
+func (c *UdpClient) SubItem() (error, string) {
+	data := fmt.Sprintf("add %s %s\x00", "0x100001", "0x01")
+	buff := c.request(udps.SdoPack(udps.GetRawData(data, udps.String), udps.SUB_ITEM, c.requestId()))
+	fmt.Println(buff)
+	return nil, ""
+}
+
+func (c *UdpClient) SubItems() (error, string) {
+	data1 := fmt.Sprintf("add %s %s\x00x00", "0x100001", "0x01")
+	data2 := fmt.Sprintf("add %s %s\x00x00", "0x100002", "0x01")
+	data := data1 + data2
+	buff := c.request(udps.SdoPack(udps.GetRawData(data, udps.String), udps.SUB_ITEM, c.requestId()))
+	fmt.Println(buff)
+	return nil, ""
+}
+
+func (c *UdpClient) UnSubItem() (error, string) {
+	data := fmt.Sprintf("del %s %s\x00", "0x100001", "0x01")
+	buff := c.request(udps.SdoPack(udps.GetRawData(data, udps.String), udps.SUB_ITEM, c.requestId()))
+	fmt.Println(buff)
+	return nil, ""
+}
+
+func (c *UdpClient) UnSubItems() (error, string) {
+	data1 := fmt.Sprintf("del %s %s\x00", "0x100001", "0x01")
+	data2 := fmt.Sprintf("del %s %s\x00", "0x100002", "0x01")
+	data := data1 + data2
+	buff := c.request(udps.SdoPack(udps.GetRawData(data, udps.String), udps.SUB_ITEM, c.requestId()))
+	fmt.Println(buff)
+	return nil, ""
 }
