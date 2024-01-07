@@ -17,6 +17,8 @@ const (
 	BasePath = "/rush/v1"
 )
 
+var Httpd *Service
+
 type Diagnostic interface {
 	Error(msg string, err error)
 	Info(msg string)
@@ -86,7 +88,7 @@ func NewService(doc string, c Config, hostname string, d Diagnostic, disc *diagn
 	if err != nil {
 		return nil, err
 	}
-
+	Httpd = s
 	return s, nil
 }
 
