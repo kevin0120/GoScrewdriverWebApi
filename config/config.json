@@ -25,7 +25,7 @@
       {
         "model": "ModelLeetxTCS2000",
         "protocol": "OpenProtocol",
-        "endpoint": "tcp://192.168.20.145:4545",
+        "endpoint": "tcp://192.168.20.145:9101",
         "keepalive": "3s",
         "sn": "ControllerSn",
         "name": "ControllerName",

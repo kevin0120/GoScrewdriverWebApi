@@ -47,6 +47,7 @@ type TighteningController struct {
 	status               *atomic.String
 	serialNumber         string
 	diag                 Diagnostic
+	hasSubscribedVin     atomic.Bool
 }
 
 func (s *TighteningController) Protocol() string {
@@ -106,16 +107,74 @@ func (s *TighteningController) InitSubscribeInfos() {
 	s.ControllerSubscribes = []ControllerSubscribe{
 		s.ResultSubscribe,
 		////c.SelectorSubscribe,
-		//c.JobInfoSubscribe,
+		s.JobInfoSubscribe,
 		//c.IOInputSubscribe,
-		//c.VinSubscribe,
-		//c.AlarmSubscribe,
-		//c.CurveSubscribe,
+		s.VinSubscribe,
+		s.AlarmSubscribe,
+		//s.CurveSubscribe,
 	}
 }
+func (s *TighteningController) JobInfoSubscribe(sn string) error {
 
-func (c *TighteningController) processSubscribeControllerInfo(sn string) {
-	for _, subscribe := range c.ControllerSubscribes {
+	reply, err := s.getClient(sn).ProcessRequest(MID_0034_JOB_INFO_SUBSCRIBE, true, "", "", "")
+	if err != nil {
+		return err
+	}
+
+	if reply.(string) != requestErrors["00"] {
+		return errors.New(fmt.Sprintf("MID: %s err: %s", MID_0034_JOB_INFO_SUBSCRIBE, reply.(string)))
+	}
+
+	return nil
+}
+
+func (s *TighteningController) VinSubscribe(sn string) error {
+	if s.hasSubscribedVin.Load() {
+		return nil
+	}
+	s.hasSubscribedVin.Store(true)
+
+	reply, err := s.getClient(sn).ProcessRequest(MID_0051_VIN_SUBSCRIBE, true, "", "", "")
+	if err != nil {
+		return err
+	}
+
+	if reply.(string) != requestErrors["00"] {
+		return errors.New(fmt.Sprintf("MID: %s err: %s", MID_0051_VIN_SUBSCRIBE, reply.(string)))
+	}
+
+	return nil
+}
+
+func (s *TighteningController) CurveSubscribe(sn string) error {
+	reply, err := s.getClient(sn).ProcessRequest(MID_7408_LAST_CURVE_SUBSCRIBE, false, "", "", "")
+	if err != nil {
+		return err
+	}
+
+	if reply.(string) != requestErrors["00"] {
+		return errors.New(fmt.Sprintf("MID: %s err: %s", MID_7408_LAST_CURVE_SUBSCRIBE, reply.(string)))
+	}
+
+	return nil
+}
+
+func (s *TighteningController) AlarmSubscribe(sn string) error {
+
+	reply, err := s.getClient(sn).ProcessRequest(MID_0070_ALARM_SUBSCRIBE, true, "", "", "")
+	if err != nil {
+		return err
+	}
+
+	if reply.(string) != requestErrors["00"] {
+		return errors.New(fmt.Sprintf("MID: %s err: %s", MID_0070_ALARM_SUBSCRIBE, reply.(string)))
+	}
+
+	return nil
+}
+
+func (s *TighteningController) processSubscribeControllerInfo(sn string) {
+	for _, subscribe := range s.ControllerSubscribes {
 		// 方法是阻塞的方法，因此要单独跑一个协程，如果订阅成功dead，未成功一直订阅
 		go func(sub func(sn string) error) {
 			operation := func() error {
@@ -133,10 +192,10 @@ func (c *TighteningController) processSubscribeControllerInfo(sn string) {
 				return nil
 			}
 			err := backoff.RetryNotify(operation, backoff.NewExponentialBackOff(), func(err error, duration time.Duration) {
-				c.diag.Debug(fmt.Sprintf("SeqNumber: %s OpenProtocol SubscribeControllerInfo Failed: %s, retry after %v", sn, err.Error(), duration))
+				s.diag.Debug(fmt.Sprintf("SeqNumber: %s OpenProtocol SubscribeControllerInfo Failed: %s, retry after %v", sn, err.Error(), duration))
 			})
 			if err != nil {
-				c.diag.Error("RetryNotify subscribe error", err)
+				s.diag.Error("RetryNotify subscribe error", err)
 			}
 		}(subscribe)
 	}
@@ -148,6 +207,7 @@ func (s *TighteningController) initController(deviceConfig *tightening_device.Ti
 	s.sockClients = map[string]*clientContext{}
 	s.getInstance().InitSubscribeInfos()
 	s.diag = d
+	s.hasSubscribedVin.Store(false)
 	s.initClients(deviceConfig, d)
 }
 
@@ -182,7 +242,7 @@ func (s *TighteningController) initClients(deviceConfig *tightening_device.Tight
 	}
 }
 
-func (c *TighteningController) UpdateToolStatus(sn string, status string) {
+func (s *TighteningController) UpdateToolStatus(sn string, status string) {
 	//tool, err := c.getToolViaSerialNumber(sn)
 	//if err != nil {
 	//	tool, _ = c.getInstance().GetToolViaChannel(1)
@@ -208,23 +268,23 @@ func (s *TighteningController) SerialNumber() string {
 func (s *TighteningController) SetSerialNumber(serialNumber string) {
 	s.serialNumber = serialNumber
 }
-func (c *TighteningController) getClient(sn string) *clientContext {
-	if c.isGlobalConn {
-		return c.getDefaultTransportClient()
+func (s *TighteningController) getClient(sn string) *clientContext {
+	if s.isGlobalConn {
+		return s.getDefaultTransportClient()
 	}
 
-	return c.getTransportClientBySymbol(sn)
+	return s.getTransportClientBySymbol(sn)
 }
-func (c *TighteningController) getDefaultTransportClient() *clientContext {
+func (s *TighteningController) getDefaultTransportClient() *clientContext {
 
-	for _, sw := range c.sockClients {
+	for _, sw := range s.sockClients {
 		return sw
 	}
 	return nil
 }
-func (c *TighteningController) getTransportClientBySymbol(symbol string) *clientContext {
+func (s *TighteningController) getTransportClientBySymbol(symbol string) *clientContext {
 
-	if sw, ok := c.sockClients[symbol]; !ok {
+	if sw, ok := s.sockClients[symbol]; !ok {
 		//err := errors.Errorf("Can Not Found TransportService For %s", symbol)
 		//c.diag.Error("getTransportClientBySymbol", err)
 		return nil
