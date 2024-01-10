@@ -271,7 +271,6 @@ func (c *clientContext) procAlive() {
 //	c.clientHandler.UpdateToolStatus(c.sn, BaseDeviceStatusOffline)
 //}
 
-//
 func (c *clientContext) Read(conn net.Conn) {
 	defer func() {
 		if err := conn.Close(); err != nil {
@@ -472,7 +471,8 @@ func (c *clientContext) sendOpenProtocolRequest(message []byte, sequence uint32)
 		select {
 		case <-ctx.Done():
 			c.updateNeedRespFlag(false)
-			return nil, errors.Wrap(ctx.Err(), "sendOpenProtocolRequest")
+			fmt.Println(string(message))
+			return nil, errors.Wrap(ctx.Err(), "sendOpenProtocolRequest11")
 		case pkg := <-c.responseChannel:
 			if !StrictOpSeq {
 				return pkg, nil

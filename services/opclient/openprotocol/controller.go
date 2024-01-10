@@ -75,6 +75,20 @@ func (s *TighteningController) New() IOpenProtocolController {
 	//fixme: 永远不能被调用
 	return nil
 }
+
+func (s *TighteningController) InitSubscribeInfos() {
+	s.ControllerSubscribes = []ControllerSubscribe{
+		s.ResultSubscribe,
+		////c.SelectorSubscribe,
+		s.JobInfoSubscribe,
+		//c.IOInputSubscribe,
+		s.VinSubscribe,
+		s.AlarmSubscribe,
+		////s.CurveSubscribe,
+		s.TimeInfoSubscribe,
+	}
+}
+
 func (s *TighteningController) ResultSubscribe(sn string) error {
 	//FIXME: 现在临时通过异常捕捉的方式进行修复
 	defer func() { //进行异常捕捉
@@ -103,17 +117,6 @@ func (s *TighteningController) ResultSubscribe(sn string) error {
 
 	return nil
 }
-func (s *TighteningController) InitSubscribeInfos() {
-	s.ControllerSubscribes = []ControllerSubscribe{
-		s.ResultSubscribe,
-		////c.SelectorSubscribe,
-		s.JobInfoSubscribe,
-		//c.IOInputSubscribe,
-		s.VinSubscribe,
-		s.AlarmSubscribe,
-		//s.CurveSubscribe,
-	}
-}
 func (s *TighteningController) JobInfoSubscribe(sn string) error {
 
 	reply, err := s.getClient(sn).ProcessRequest(MID_0034_JOB_INFO_SUBSCRIBE, true, "", "", "")
@@ -123,6 +126,20 @@ func (s *TighteningController) JobInfoSubscribe(sn string) error {
 
 	if reply.(string) != requestErrors["00"] {
 		return errors.New(fmt.Sprintf("MID: %s err: %s", MID_0034_JOB_INFO_SUBSCRIBE, reply.(string)))
+	}
+
+	return nil
+}
+
+func (s *TighteningController) TimeInfoSubscribe(sn string) error {
+
+	reply, err := s.getClient(sn).ProcessRequest(MID_0080_TIME_SUBSCRIBE, true, "", "", "")
+	if err != nil {
+		return err
+	}
+
+	if reply.(string) != requestErrors["00"] {
+		return errors.New(fmt.Sprintf("MID: %s err: %s", MID_0080_TIME_SUBSCRIBE, reply.(string)))
 	}
 
 	return nil

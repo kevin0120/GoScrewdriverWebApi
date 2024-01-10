@@ -67,12 +67,39 @@ func HandleMid0065OldData(c *TighteningController, pkg *handlerPkg) error {
 
 // pset详情
 func HandleMid0013PsetDetailReply(c *TighteningController, pkg *handlerPkg) error {
+	client := c.getClient(pkg.SN)
+	psetDetail, err := DeserializePSetDetail(pkg.Body)
+	if err != nil {
+		return err
+	}
+
+	resp := &respPkg{
+		Seq:  pkg.Seq,
+		Body: psetDetail,
+	}
+	if client.IsNeedResponse() {
+		client.responseChannel <- resp
+	}
 
 	return nil
 }
 
 // pset列表
 func HandleMid0011PsetListReply(c *TighteningController, pkg *handlerPkg) error {
+	client := c.getClient(pkg.SN)
+	psetList := PSetList{}
+	err := psetList.Deserialize(pkg.Body)
+	if err != nil {
+		return err
+	}
+
+	resp := &respPkg{
+		Seq:  pkg.Seq,
+		Body: psetList,
+	}
+	if client.IsNeedResponse() {
+		client.responseChannel <- resp
+	}
 
 	return nil
 }
@@ -146,8 +173,16 @@ const DummyBarCode = 0
 
 // 收到条码推送
 func HandleMid0052Vin(c *TighteningController, pkg *handlerPkg) (err error) {
+	//client := c.getClient(pkg.SN)
+	//resp := &respPkg{
+	//	Seq:  pkg.Seq,
+	//	Body: requestErrors["00"],
+	//}
+	//if client.IsNeedResponse() {
+	//	client.responseChannel <- resp
+	//}
 
-	return
+	return nil
 }
 
 // 报警信息
@@ -158,6 +193,20 @@ func HandleMid0071Alarm(c *TighteningController, pkg *handlerPkg) error {
 
 // 报警状态
 func HandleMid0076AlarmStatus(c *TighteningController, pkg *handlerPkg) error {
+
+	return nil
+}
+
+// 报警状态
+func HandleMid0081Time(c *TighteningController, pkg *handlerPkg) error {
+	client := c.getClient(pkg.SN)
+	resp := &respPkg{
+		Seq:  pkg.Seq,
+		Body: requestErrors["00"],
+	}
+	if client.IsNeedResponse() {
+		client.responseChannel <- resp
+	}
 
 	return nil
 }

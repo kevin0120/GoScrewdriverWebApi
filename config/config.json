@@ -1,7 +1,7 @@
 {
   "hostname": "localhost",
   "data_dir": ".rush",
-  "serial_no": "779e0b6e-e12a-4067-b9e4-065409d9fe36",
+  "serial_no": "24346d46-127f-4c05-9c05-aa1213059ed4",
   "doc_path": "doc",
   "op_port": 4545,
   "udp_client": {
@@ -26,7 +26,7 @@
         "model": "ModelLeetxTCS2000",
         "protocol": "OpenProtocol",
         "endpoint": "tcp://192.168.20.145:9101",
-        "keepalive": "3s",
+        "keepalive": "30s",
         "sn": "ControllerSn",
         "name": "ControllerName",
         "children": [
@@ -34,6 +34,9 @@
             "sn": "ToolSn",
             "channel": 1,
             "endpoint": ""
+
+            
+
           }
         ]
       }

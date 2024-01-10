@@ -59,7 +59,7 @@ func NewConfig() Config {
 				Protocol:       "OpenProtocol",
 				Endpoint:       "tcp://192.168.20.145:9101",
 				SN:             "ControllerSn",
-				KeepAlive:      toml.Duration(time.Second * 3),
+				KeepAlive:      toml.Duration(time.Second * 30),
 				ControllerName: "ControllerName",
 				Tools: []ToolConfig{
 					{
