@@ -56,76 +56,11 @@ func (s *Service) getHealthz(ctx iris.Context) {
 
 func (s *Service) setupTestInterface() {
 	var r httpd.Route
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "GET",
-		Pattern:     "/healthz",
-		HandlerFunc: s.getHealthz,
-	}
-	s.httpd.AddNewHttpHandler(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "PUT",
-		Pattern:     "/notify",
-		HandlerFunc: s.putNotify,
-	}
-	s.httpd.AddNewHttpHandler(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "GET",
-		Pattern:     "/workorders",
-		HandlerFunc: s.listWorkorders,
-	}
-	s.httpd.AddNewHttpHandler(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "GET",
-		Pattern:     "/workorder",
-		HandlerFunc: s.getWorkorderDetail,
-	}
-	s.httpd.AddNewHttpHandler(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "GET",
-		Pattern:     "/local-results",
-		HandlerFunc: s.getLocalResults,
-	}
-	s.httpd.AddNewHttpHandler(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "GET",
-		Pattern:     "/next-workorder",
-		HandlerFunc: s.getNextWorkorder,
-	}
-	s.httpd.AddNewHttpHandler(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "PUT",
-		Pattern:     "/tool-enable",
-		HandlerFunc: s.putToolControl,
-	}
-	s.httpd.AddNewHttpHandler(r)
-
-	r = httpd.Route{
-		RouteType:   httpd.ROUTE_TYPE_HTTP,
-		Method:      "PUT",
-		Pattern:     "/psets",
-		HandlerFunc: s.putPSets,
-	}
-	s.httpd.AddNewHttpHandler(r)
-
 	r = httpd.Route{
 		RouteType:   httpd.ROUTE_TYPE_HTTP,
 		Method:      "POST",
-		Pattern:     "/ak2",
-		HandlerFunc: s.postAK2,
+		Pattern:     "/tighteningControl",
+		HandlerFunc: s.tighteningControl,
 	}
 	s.httpd.AddNewHttpHandler(r)
 
