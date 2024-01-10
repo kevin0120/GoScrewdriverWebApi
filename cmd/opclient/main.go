@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/kevin0120/GoScrewdriverWebApi/config"
 	"github.com/kevin0120/GoScrewdriverWebApi/services/diagnostic"
+	"github.com/kevin0120/GoScrewdriverWebApi/services/http/httpd"
+	"github.com/kevin0120/GoScrewdriverWebApi/services/opclient/hmi"
 	"github.com/kevin0120/GoScrewdriverWebApi/services/opclient/openprotocol"
 	"github.com/kevin0120/GoScrewdriverWebApi/services/opclient/openprotocol/vendors"
 	"github.com/kevin0120/GoScrewdriverWebApi/services/opclient/tightening_device"
@@ -32,13 +34,27 @@ func main() {
 		return
 	}
 	op := diagService.NewOpenProtocolHandler()
-	s, err := tightening_device.NewService(config.GetConfig().TighteningDevice, []tightening_device.ITighteningProtocol{
+	tighteningSerivce, err := tightening_device.NewService(config.GetConfig().TighteningDevice, []tightening_device.ITighteningProtocol{
 		openprotocol.NewService(config.GetConfig().OpenProtocol, op, vendors.OpenProtocolVendors),
 	})
 	if err != nil {
 		return
 	}
-	err = s.Open()
+	err = tighteningSerivce.Open()
+	if err != nil {
+		return
+	}
+	httpDiag := diagService.NewHTTPDHandler()
+	httpdService, err := httpd.NewService(config.GetConfig().DocPath, config.GetConfig().HTTP, config.GetConfig().Hostname, httpDiag, diagService)
+	if err != nil {
+		panic("!!!Panic: Can Not Open Http Service!!!")
+	}
+	err = httpdService.Open()
+	if err != nil {
+		return
+	}
+	hmiService := hmi.NewService(httpDiag, httpdService, "My", tighteningSerivce)
+	err = hmiService.Open()
 	if err != nil {
 		return
 	}

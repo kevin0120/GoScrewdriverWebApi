@@ -208,3 +208,15 @@ func (s *Service) GetHandlerByName(version string) (*Handler, error) {
 
 	return s.Handler[i], nil
 }
+
+func (s *Service) AddNewHttpHandler(r Route) error {
+	h, err := s.GetHandlerByName(BasePath)
+	if err != nil {
+		return err
+	}
+	err = h.AddRoute(r)
+	if err != nil {
+		return err
+	}
+	return nil
+}

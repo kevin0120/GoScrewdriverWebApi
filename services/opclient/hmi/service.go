@@ -16,7 +16,7 @@ type Service struct {
 	workcenterSN string
 }
 
-func NewService(c Config, d Diagnostic, httpd HTTPService, sn string, tightening ITightening) *Service {
+func NewService(d Diagnostic, httpd HTTPService, sn string, tightening ITightening) *Service {
 
 	s := &Service{
 		diag:              d,
@@ -24,7 +24,9 @@ func NewService(c Config, d Diagnostic, httpd HTTPService, sn string, tightening
 		workcenterSN:      sn,
 		TighteningService: tightening,
 	}
-	s.configValue.Store(c)
+	s.configValue.Store(Config{
+		true,
+	})
 
 	s.setupTestInterface()
 
@@ -44,9 +46,6 @@ func (s *Service) Open() error {
 }
 
 func (s *Service) Close() error {
-	s.diag.Close()
-	s.diag.Closed()
-
 	return nil
 }
 
