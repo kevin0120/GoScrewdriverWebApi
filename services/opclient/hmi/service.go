@@ -1,7 +1,6 @@
 package hmi
 
 import (
-	"github.com/kataras/iris/v12"
 	"github.com/kevin0120/GoScrewdriverWebApi/services/http/httpd"
 	"go.uber.org/atomic"
 )
@@ -47,11 +46,6 @@ func (s *Service) Open() error {
 
 func (s *Service) Close() error {
 	return nil
-}
-
-// healthz
-func (s *Service) getHealthz(ctx iris.Context) {
-	ctx.StatusCode(iris.StatusNoContent)
 }
 
 func (s *Service) setupTestInterface() {

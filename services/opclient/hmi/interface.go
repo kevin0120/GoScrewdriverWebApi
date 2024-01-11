@@ -2,6 +2,7 @@ package hmi
 
 import (
 	"github.com/kevin0120/GoScrewdriverWebApi/services/http/httpd"
+	"github.com/kevin0120/GoScrewdriverWebApi/services/opclient/tightening_device"
 )
 
 type Diagnostic interface {
@@ -22,4 +23,5 @@ type ITightening interface {
 	//ToolPSetSet(req *tightening_device.PSetSet) error
 	//GetControllerByToolSN(toolSN string) (tightening_device.ITighteningController, error)
 	//GetToolByToolSN(toolSN string) (tightening_device.ITighteningTool, error)
+	HandleHmiRequest(cmd tightening_device.TighteningDeviceCmd)
 }

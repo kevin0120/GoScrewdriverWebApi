@@ -1,7 +1,7 @@
 {
   "hostname": "localhost",
   "data_dir": ".rush",
-  "serial_no": "24346d46-127f-4c05-9c05-aa1213059ed4",
+  "serial_no": "ee80ad55-6a49-4acf-aea0-a06f210af18c",
   "doc_path": "doc",
   "op_port": 4545,
   "udp_client": {
@@ -27,16 +27,58 @@
         "protocol": "OpenProtocol",
         "endpoint": "tcp://192.168.20.145:9101",
         "keepalive": "30s",
-        "sn": "ControllerSn",
+        "sn": "ControllerSn1111",
         "name": "ControllerName",
         "children": [
           {
             "sn": "ToolSn",
             "channel": 1,
             "endpoint": ""
-
-            
-
+          }
+        ]
+      },
+      {
+        "model": "ModelLeetxTCS2000",
+        "protocol": "OpenProtocol",
+        "endpoint": "tcp://192.168.20.145:9101",
+        "keepalive": "30s",
+        "sn": "ControllerSn2222",
+        "name": "ControllerName",
+        "children": [
+          {
+            "sn": "ToolSn",
+            "channel": 1,
+            "endpoint": ""
+          }
+        ]
+      },
+      {
+        "model": "ModelLeetxTCS2000",
+        "protocol": "OpenProtocol",
+        "endpoint": "tcp://192.168.20.145:9101",
+        "keepalive": "30s",
+        "sn": "ControllerSn3333",
+        "name": "ControllerName",
+        "children": [
+          {
+            "sn": "ToolSn",
+            "channel": 1,
+            "endpoint": ""
+          }
+        ]
+      },
+      {
+        "model": "ModelLeetxTCS2000",
+        "protocol": "OpenProtocol",
+        "endpoint": "tcp://192.168.20.145:9101",
+        "keepalive": "30s",
+        "sn": "ControllerSn4444",
+        "name": "ControllerName",
+        "children": [
+          {
+            "sn": "ToolSn",
+            "channel": 1,
+            "endpoint": ""
           }
         ]
       }

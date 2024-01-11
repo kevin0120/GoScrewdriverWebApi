@@ -27,7 +27,8 @@ type ControlData struct {
 	D150 string `json:"D150"`
 }
 
-type WorkSiteLeaving struct {
+type TighteningDeviceCmd struct {
+	Sn          string      `json:"sn"`
 	Mid         string      `json:"mid"`
 	ControlData ControlData `json:"data"`
 }

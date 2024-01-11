@@ -18,7 +18,7 @@ func init() {
 }
 
 func (m *Service) tighteningControl(ctx iris.Context) {
-	cr := tightening_device.TighteningResult{}
+	cr := tightening_device.TighteningDeviceCmd{}
 	err := ctx.ReadJSON(&cr)
 
 	if err != nil {
@@ -27,39 +27,5 @@ func (m *Service) tighteningControl(ctx iris.Context) {
 		ctx.WriteString(err.Error())
 		return
 	}
-
-	if cr.ControllerSN == "" {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("controller_sn is required")
-		return
-	}
-
-	if cr.ToolSN == "" {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("gun_sn is required")
-		return
-	}
-
-	//if cr.PSet == 0 {
-	//	ctx.StatusCode(iris.StatusBadRequest)
-	//	ctx.WriteString("pset is required")
-	//	return
-	//}
-
-	if cr.Count == 0 {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("count is required")
-		return
-	}
-
-	if cr.Seq == 0 {
-		ctx.StatusCode(iris.StatusBadRequest)
-		ctx.WriteString("seq is required")
-		return
-	}
-	if cr.WorkorderID == 0 {
-		//没有工单直接点击了放行按钮，猜测是为了联动
-		//fixme: 现在使用控制器名称作为站点的信息
-		return
-	}
+	m.TighteningService.HandleHmiRequest(cr)
 }

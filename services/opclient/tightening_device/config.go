@@ -53,12 +53,53 @@ func NewConfig() Config {
 	return Config{
 		Enable: true,
 		Devices: []TighteningDeviceConfig{
-
 			{
 				Model:          ModelLeetxTCS2000,
 				Protocol:       "OpenProtocol",
 				Endpoint:       "tcp://192.168.20.145:9101",
-				SN:             "ControllerSn",
+				SN:             "ControllerSn1111",
+				KeepAlive:      toml.Duration(time.Second * 30),
+				ControllerName: "ControllerName",
+				Tools: []ToolConfig{
+					{
+						SN:      "ToolSn",
+						Channel: 1,
+					},
+				},
+			},
+			{
+				Model:          ModelLeetxTCS2000,
+				Protocol:       "OpenProtocol",
+				Endpoint:       "tcp://192.168.20.145:9101",
+				SN:             "ControllerSn2222",
+				KeepAlive:      toml.Duration(time.Second * 30),
+				ControllerName: "ControllerName",
+				Tools: []ToolConfig{
+					{
+						SN:      "ToolSn",
+						Channel: 1,
+					},
+				},
+			},
+			{
+				Model:          ModelLeetxTCS2000,
+				Protocol:       "OpenProtocol",
+				Endpoint:       "tcp://192.168.20.145:9101",
+				SN:             "ControllerSn3333",
+				KeepAlive:      toml.Duration(time.Second * 30),
+				ControllerName: "ControllerName",
+				Tools: []ToolConfig{
+					{
+						SN:      "ToolSn",
+						Channel: 1,
+					},
+				},
+			},
+			{
+				Model:          ModelLeetxTCS2000,
+				Protocol:       "OpenProtocol",
+				Endpoint:       "tcp://192.168.20.145:9101",
+				SN:             "ControllerSn4444",
 				KeepAlive:      toml.Duration(time.Second * 30),
 				ControllerName: "ControllerName",
 				Tools: []ToolConfig{

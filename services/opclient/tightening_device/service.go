@@ -197,3 +197,15 @@ func (s *Service) shutdownControllers() {
 	//	}
 	//}
 }
+
+func (s *Service) HandleHmiRequest(cmd TighteningDeviceCmd) {
+	s.mtxDevices.Lock()
+	defer s.mtxDevices.Unlock()
+
+	//for _, c := range s.runningControllers {
+	//	err := c.Stop()
+	//	if err != nil {
+	//		continue
+	//	}
+	//}
+}
